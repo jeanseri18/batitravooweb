@@ -882,6 +882,8 @@ main.app-content:focus {
     font-size: 1rem;
     cursor: pointer;
     font-family: inherit;
+    text-decoration: none;
+    text-align: center;
     box-shadow: 0 4px 14px rgba(0, 33, 71, 0.2);
     transition: filter 0.15s, transform 0.1s, background 0.15s;
 }
@@ -1797,7 +1799,8 @@ main.app-content:focus {
 }
 
 .app-text-link:hover {
-    text-decoration: underline;
+    text-decoration: none;
+    filter: brightness(1.2);
 }
 
 .app-text-link.is-active {
@@ -2687,6 +2690,17 @@ main.app-content:focus {
     gap: 0.65rem;
     margin-top: 1rem;
     align-items: center;
+}
+
+.mp-detail-actions .app-btn {
+    flex: 1;
+    width: auto;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.mp-detail-actions .app-btn:hover {
+    text-decoration: none;
 }
 
 .mp-empty {

@@ -1,3 +1,14 @@
+<!-- Formater la date -->
+@php
+    $formatDate = function ($iso) {
+        if (empty($iso)) return '—';
+        try {
+            $c = \Carbon\Carbon::parse($iso)->locale('fr');
+            return $c->translatedFormat('d M Y, H:i');
+        } catch (\Throwable) { return (string) $iso; }
+    };
+@endphp
+
 <div class="app-card app-card--flush app-flex-between-wrap">
     <a href="{{ route('app.'.$profileSlug.'.support.create') }}" class="app-btn app-btn--inline">Nouveau ticket</a>
 </div>
@@ -16,7 +27,7 @@
                                 <span class="app-muted">{{ $t['priority'] ?? '—' }}</span>
                             </span>
                         </span>
-                        <time class="msn-ticket-row__time">{{ \Illuminate\Support\Str::limit($t['updated_at'] ?? '', 16) }}</time>
+                        <time class="msn-ticket-row__time">{{ $formatDate($t['updated_at'] ?? '') }}</time>
                     </a>
                 </li>
             @endforeach

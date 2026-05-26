@@ -5,6 +5,17 @@
     <a href="{{ route('app.'.$profileSlug.'.devis') }}" class="app-text-link">← Retour à la liste</a>
 </div>
 
+<!-- Formater la date -->
+@php
+    $formatDate = function ($iso) {
+        if (empty($iso)) return '—';
+        try {
+            $c = \Carbon\Carbon::parse($iso)->locale('fr');
+            return $c->translatedFormat('d M Y, H:i');
+        } catch (\Throwable) { return (string) $iso; }
+    };
+@endphp
+
 @if (! empty($d))
     <div class="app-card app-mt">
         <h2 class="app-section-title">{{ $d['title'] ?? 'Devis #'.$d['id'] }}</h2>
@@ -16,7 +27,7 @@
                 <tr><th>Réf. commande</th><td>{{ $d['order_reference'] ?? '—' }}</td></tr>
                 <tr><th>Lieu</th><td>{{ $d['place'] ?? '—' }}</td></tr>
                 <tr><th>Contact</th><td>{{ $d['contact'] ?? '—' }}</td></tr>
-                <tr><th>Créé le</th><td>{{ $d['created_at'] ?? '—' }}</td></tr>
+                <tr><th>Créé le</th><td>{{ $formatDate($d['created_at'] ?? '—') }}</td></tr>
             </tbody>
         </table>
         @if (! empty($d['line_items']))
