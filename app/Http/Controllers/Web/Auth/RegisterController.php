@@ -61,6 +61,9 @@ class RegisterController extends Controller
                 'max:255',
             ],
             'company_address' => ['nullable', 'string', 'max:2000'],
+            'accept_terms' => ['accepted'],
+        ], [
+            'accept_terms.accepted' => 'Vous devez accepter les conditions générales et la politique de confidentialité.',
         ]);
 
         $isIndividual = in_array($data['profile_type'], [

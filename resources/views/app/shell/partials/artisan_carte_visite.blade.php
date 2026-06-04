@@ -7,16 +7,38 @@
         $svcList[] = '';
     }
     $svcList = array_slice($svcList, 0, 6);
+    $portfolioPaths = $card?->portfolio_paths ?? ($card?->portfolio_path ? [$card->portfolio_path] : []);
+    if (! is_array($portfolioPaths)) {
+        $portfolioPaths = [];
+    }
+    $priceMode = old('price_mode');
+    if ($priceMode === null && $card) {
+        if ($card->price_on_quote) {
+            $priceMode = 'sur_devis';
+        } elseif ($card->price_text && str_starts_with(strtolower($card->price_text), 'à partir de')) {
+            $priceMode = 'variable';
+        } else {
+            $priceMode = 'fixe';
+        }
+    }
+    $priceMode = $priceMode ?? 'fixe';
+    $priceTextVal = old('price_text', $card?->price_text ?? '');
+    if ($priceMode === 'variable' && $card?->price_text) {
+        $priceTextVal = preg_replace('/^à partir de\s*/iu', '', (string) $card->price_text);
+    }
 @endphp
 
-@if ($card && $card->portfolio_path)
-    @php $pfUrl = storage_public_url($card->portfolio_path); @endphp
-    @if ($pfUrl)
-        <div class="app-card app-mt">
-            <p class="app-muted app-mb-sm">Portfolio actuel</p>
-            <a href="{{ $pfUrl }}" target="_blank" rel="noopener" class="app-text-link">Télécharger / ouvrir le fichier</a>
-        </div>
-    @endif
+@if (count($portfolioPaths) > 0)
+    <div class="app-card app-mt">
+        <p class="app-muted app-mb-sm">Réalisations enregistrées ({{ count($portfolioPaths) }})</p>
+        @foreach ($portfolioPaths as $p)
+            @php $pfUrl = storage_public_url($p); @endphp
+            @if ($pfUrl)
+                <input type="hidden" name="keep_portfolio_paths[]" value="{{ $p }}">
+                <p class="app-mb-sm"><a href="{{ $pfUrl }}" target="_blank" rel="noopener" class="app-text-link">Photo portfolio</a></p>
+            @endif
+        @endforeach
+    </div>
 @endif
 
 <form method="post" action="{{ route('app.artisan.business_card.update') }}" enctype="multipart/form-data" class="app-card app-mt app-form-stack">
@@ -41,17 +63,21 @@
     </div>
 
     <fieldset class="app-field">
-        <legend class="app-muted app-text-sm app-mb-sm">Tarification</legend>
+        <legend class="app-muted app-text-sm app-mb-sm">Prix *</legend>
         <label class="app-checkbox-label app-mb-sm">
-            <input type="checkbox" name="price_on_request" value="1" @checked(old('price_on_request', $card?->price_on_request))>
-            Prix sur demande
+            <input type="radio" name="price_mode" value="fixe" @checked($priceMode === 'fixe')>
+            Prix fixe
         </label>
         <label class="app-checkbox-label app-mb-sm">
-            <input type="checkbox" name="price_on_quote" value="1" @checked(old('price_on_quote', $card?->price_on_quote))>
-            Sur devis
+            <input type="radio" name="price_mode" value="variable" @checked($priceMode === 'variable')>
+            Prix variable
         </label>
-        <label for="bc-price">Texte tarif</label>
-        <input type="text" name="price_text" id="bc-price" maxlength="255" value="{{ old('price_text', $card?->price_text) }}">
+        <label class="app-checkbox-label app-mb-sm">
+            <input type="radio" name="price_mode" value="sur_devis" @checked($priceMode === 'sur_devis')>
+            Prix sur devis
+        </label>
+        <label for="bc-price">Montant (fixe ou « à partir de »)</label>
+        <input type="text" name="price_text" id="bc-price" maxlength="255" value="{{ $priceTextVal }}" placeholder="Ex. 300 000 FCFA">
         @error('price_text')<span class="app-error">{{ $message }}</span>@enderror
     </fieldset>
 
@@ -86,9 +112,11 @@
     </div>
 
     <div class="app-field">
-        <label for="bc-portfolio">Portfolio (image ou PDF, max 15 Mo)</label>
-        <input type="file" name="portfolio" id="bc-portfolio" accept="image/jpeg,image/png,image/webp,application/pdf,.jpg,.jpeg,.png,.webp,.pdf">
+        <label for="bc-portfolio">Ajouter des réalisations (portfolio)</label>
+        <p class="app-muted app-text-sm app-mb-sm">Une ou plusieurs photos (JPG, PNG, WebP — max 15 Mo chacune).</p>
+        <input type="file" name="portfolio[]" id="bc-portfolio" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple>
         @error('portfolio')<span class="app-error">{{ $message }}</span>@enderror
+        @error('portfolio.*')<span class="app-error">{{ $message }}</span>@enderror
     </div>
 
     <div class="app-form-actions">

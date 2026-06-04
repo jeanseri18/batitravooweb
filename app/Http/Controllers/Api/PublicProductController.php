@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\ResolvesOptionalApiUser;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\User;
@@ -10,6 +11,8 @@ use Illuminate\Http\Request;
 
 class PublicProductController extends Controller
 {
+    use ResolvesOptionalApiUser;
+
     public function index(Request $request): JsonResponse
     {
         $q = Product::query()
@@ -19,6 +22,10 @@ class PublicProductController extends Controller
                     ->where('is_active', true);
             })
             ->with(['category', 'user']);
+
+        if (! $request->filled('user_id')) {
+            $this->excludeSelfFromMarketplace($q, $request, 'user_id');
+        }
 
         $search = $request->string('q')->trim()->toString();
         if ($search !== '') {

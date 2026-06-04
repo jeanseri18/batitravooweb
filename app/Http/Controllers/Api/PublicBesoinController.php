@@ -94,6 +94,8 @@ class PublicBesoinController extends Controller
                 'id' => $u->id,
                 'name' => $displayName,
                 'profile_type' => $u->profile_type,
+                'phone' => $this->ownerPhone($u),
+                'email' => $this->ownerEmail($u),
             ];
         }
         if ($detail) {
@@ -101,5 +103,30 @@ class PublicBesoinController extends Controller
         }
 
         return $r;
+    }
+
+    private function ownerPhone(User $u): ?string
+    {
+        $phone = trim((string) ($u->phone ?? ''));
+        if ($phone !== '') {
+            return $phone;
+        }
+        $mgr = trim((string) ($u->manager_contact ?? ''));
+        if ($mgr !== '' && ! str_contains($mgr, '@')) {
+            return $mgr;
+        }
+
+        return null;
+    }
+
+    private function ownerEmail(User $u): ?string
+    {
+        $email = trim((string) ($u->email ?? ''));
+        if ($email !== '') {
+            return $email;
+        }
+        $contactEmail = trim((string) ($u->contact_email ?? ''));
+
+        return $contactEmail !== '' ? $contactEmail : null;
     }
 }

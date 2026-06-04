@@ -2,15 +2,21 @@
 
 namespace App\Http\Controllers\Api\Me;
 
+use App\Http\Controllers\Api\Concerns\FormatsArtisanBusinessCard;
 use App\Http\Controllers\Controller;
 use App\Models\ArtisanBusinessCard;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class ArtisanBusinessCardController extends Controller
 {
+    use FormatsArtisanBusinessCard;
+
     public function show(Request $request): JsonResponse
     {
         $u = $request->user();
@@ -19,7 +25,7 @@ class ArtisanBusinessCardController extends Controller
         $c = ArtisanBusinessCard::query()->where('user_id', $u->id)->first();
 
         return response()->json([
-            'data' => $c ? $this->row($c) : null,
+            'data' => $c ? $this->artisanBusinessCardRow($c) : null,
         ]);
     }
 
@@ -27,6 +33,14 @@ class ArtisanBusinessCardController extends Controller
     {
         $u = $request->user();
         abort_unless($u->profile_type === User::PROFILE_ARTISAN, 403);
+
+        $servicesRaw = $request->input('services');
+        if (is_string($servicesRaw) && $servicesRaw !== '') {
+            $decoded = json_decode($servicesRaw, true);
+            if (is_array($decoded)) {
+                $request->merge(['services' => $decoded]);
+            }
+        }
 
         $validated = $request->validate([
             'display_name' => ['nullable', 'string', 'max:255'],
@@ -41,30 +55,40 @@ class ArtisanBusinessCardController extends Controller
             'avail_appointment' => ['sometimes', 'boolean'],
             'avail_unavailable' => ['sometimes', 'boolean'],
             'location_text' => ['nullable', 'string', 'max:500'],
-            'portfolio' => ['nullable', 'file', 'max:15360', 'mimes:jpg,jpeg,png,webp,pdf'],
+            'keep_portfolio_paths' => ['nullable', 'string', 'max:8000'],
         ]);
 
+        $this->validatePortfolioUploads($request);
+
         $card = ArtisanBusinessCard::query()->firstOrNew(['user_id' => $u->id]);
-        unset($validated['portfolio']);
+        unset($validated['portfolio'], $validated['keep_portfolio_paths']);
         $card->fill($validated);
         if (array_key_exists('services', $validated)) {
             $card->services = $validated['services'] ?? [];
         }
 
-        if ($request->hasFile('portfolio')) {
-            $pf = $request->file('portfolio');
+        $keep = $this->parseKeepPortfolioPaths($request->input('keep_portfolio_paths'));
+        $existing = $this->normalizedPortfolioPaths($card);
+        $toKeep = array_values(array_intersect($existing, $keep));
+        $removed = array_diff($existing, $toKeep);
+        foreach ($removed as $path) {
+            Storage::disk('public')->delete($path);
+        }
+
+        $newPaths = $toKeep;
+        foreach ($this->collectPortfolioUploads($request) as $pf) {
             if ($pf !== null && $pf->isValid()) {
-                if ($card->portfolio_path) {
-                    Storage::disk('public')->delete($card->portfolio_path);
-                }
-                $card->portfolio_path = $pf->store('artisan_portfolio/'.$u->id, 'public');
+                $newPaths[] = $pf->store('artisan_portfolio/'.$u->id, 'public');
             }
         }
+
+        $card->portfolio_paths = $newPaths;
+        $card->portfolio_path = $newPaths[0] ?? null;
 
         $card->user_id = $u->id;
         $card->save();
 
-        return response()->json(['data' => $this->row($card->fresh())]);
+        return response()->json(['data' => $this->artisanBusinessCardRow($card->fresh())]);
     }
 
     public function destroy(Request $request): JsonResponse
@@ -74,8 +98,8 @@ class ArtisanBusinessCardController extends Controller
 
         $c = ArtisanBusinessCard::query()->where('user_id', $u->id)->first();
         if ($c) {
-            if ($c->portfolio_path) {
-                Storage::disk('public')->delete($c->portfolio_path);
+            foreach ($this->normalizedPortfolioPaths($c) as $path) {
+                Storage::disk('public')->delete($path);
             }
             $c->delete();
         }
@@ -84,31 +108,62 @@ class ArtisanBusinessCardController extends Controller
     }
 
     /**
-     * @return array<string, mixed>
+     * @return list<string>
      */
-    private function row(ArtisanBusinessCard $c): array
+    private function parseKeepPortfolioPaths(mixed $raw): array
     {
-        $portfolioUrl = $c->portfolio_path
-            ? storage_public_url($c->portfolio_path)
-            : null;
+        if ($raw === null || $raw === '') {
+            return [];
+        }
+        if (is_array($raw)) {
+            return array_values(array_filter(array_map('strval', $raw)));
+        }
+        $decoded = json_decode((string) $raw, true);
 
-        return [
-            'id' => $c->id,
-            'display_name' => $c->display_name,
-            'profession' => $c->profession,
-            'experience_text' => $c->experience_text,
-            'price_on_request' => (bool) $c->price_on_request,
-            'price_on_quote' => (bool) $c->price_on_quote,
-            'price_text' => $c->price_text,
-            'services' => $c->services ?? [],
-            'avail_immediate' => (bool) $c->avail_immediate,
-            'avail_appointment' => (bool) $c->avail_appointment,
-            'avail_unavailable' => (bool) $c->avail_unavailable,
-            'location_text' => $c->location_text,
-            'portfolio_path' => $c->portfolio_path,
-            'portfolio_url' => $portfolioUrl,
-            'has_portfolio' => $portfolioUrl !== null,
-            'updated_at' => $c->updated_at?->toIso8601String(),
-        ];
+        return is_array($decoded)
+            ? array_values(array_filter(array_map('strval', $decoded)))
+            : [];
     }
+
+    /**
+     * @return list<UploadedFile>
+     */
+    private function validatePortfolioUploads(Request $request): void
+    {
+        $files = $this->collectPortfolioUploads($request);
+        if (count($files) > 20) {
+            throw ValidationException::withMessages([
+                'portfolio' => ['Vous ne pouvez pas envoyer plus de 20 photos.'],
+            ]);
+        }
+
+        foreach ($files as $file) {
+            $validator = Validator::make(
+                ['portfolio' => $file],
+                ['portfolio' => ['file', 'max:15360', 'mimes:jpg,jpeg,png,webp']],
+            );
+            if ($validator->fails()) {
+                throw ValidationException::withMessages([
+                    'portfolio' => $validator->errors()->get('portfolio'),
+                ]);
+            }
+        }
+    }
+
+    private function collectPortfolioUploads(Request $request): array
+    {
+        $raw = $request->file('portfolio') ?? $request->file('portfolio[]');
+        if ($raw instanceof UploadedFile) {
+            return $raw->isValid() ? [$raw] : [];
+        }
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            $raw,
+            fn ($f) => $f instanceof UploadedFile && $f->isValid(),
+        ));
+    }
+
 }

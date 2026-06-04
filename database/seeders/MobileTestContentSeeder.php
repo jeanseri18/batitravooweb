@@ -376,33 +376,41 @@ class MobileTestContentSeeder extends Seeder
             ]);
         }
 
-        // ——— Candidatures (artisan → besoins BTP + besoin particulier) ———
-        $candidatures = [
-            [$besoinBtp1, 'recu', 'Disponible sous une semaine pour visite technique.'],
-            [$besoinBtp2, 'recu', 'Équipe plaquiste 3 personnes, références chantiers Plateau.'],
-            [$besoinPart, 'recu', 'Plombier certifié — intervention Marcory / zone sud.'],
-        ];
+        // ——— Candidatures + devis opportunité (artisan → besoins BTP / particulier) ———
+        $this->seedArtisanBesoinCandidature(
+            besoin: $besoinBtp1,
+            artisan: $artisan,
+            client: $batiment,
+            candidatureStatus: 'recu',
+            devisStatus: 'envoye',
+            devisTitle: '[MOBILE] Devis terrassement — accès chantier',
+            profession: 'Terrassement / VRD',
+            postedDaysAgo: 5,
+        );
 
-        foreach ($candidatures as [$besoin, $status, $msg]) {
-            Candidature::query()->updateOrCreate(
-                [
-                    'besoin_id' => $besoin->id,
-                    'applicant_id' => $artisan->id,
-                ],
-                [
-                    'display_name' => $artisan->name,
-                    'profession' => 'Plomberie / second œuvre',
-                    'status' => $status,
-                    'posted_at' => now()->subDays(2),
-                    'message' => $msg,
-                ]
-            );
-        }
+        $this->seedArtisanBesoinCandidature(
+            besoin: $besoinBtp2,
+            artisan: $artisan,
+            client: $batiment,
+            candidatureStatus: 'recu',
+            devisStatus: 'envoye',
+            devisTitle: '[MOBILE] Devis cloisons plaque de plâtre',
+            profession: 'Plomberie / second œuvre',
+            postedDaysAgo: 2,
+        );
 
-        foreach ([$besoinBtp1, $besoinBtp2, $besoinPart] as $b) {
-            $n = Candidature::query()->where('besoin_id', $b->id)->count();
-            $b->update(['candidature_count' => $n]);
-        }
+        $this->seedArtisanBesoinCandidature(
+            besoin: $besoinPart,
+            artisan: $artisan,
+            client: $particulier,
+            candidatureStatus: 'recu',
+            devisStatus: 'envoye',
+            devisTitle: '[MOBILE] Devis réparation fuite',
+            profession: 'Plomberie / second œuvre',
+            postedDaysAgo: 3,
+        );
+
+        $this->refreshBesoinCandidatureCounts([$besoinBtp1, $besoinBtp2, $besoinPart]);
 
         // ——— Messages (aperçu messagerie) ———
         $this->seedMessage($particulier->id, $artisan->id, 'Bonjour, je souhaite un devis pour la fuite mentionnée dans mon besoin [MOBILE].');
@@ -411,6 +419,83 @@ class MobileTestContentSeeder extends Seeder
         $this->seedMessage($fournisseur->id, $particulier->id, 'Oui, disponible à l’entrepôt — merci de confirmer quantité.');
 
         $this->command?->info('MobileTestContentSeeder : besoins, services, produits, devis, commandes fournisseur, candidatures, messages OK.');
+    }
+
+    /**
+     * Candidature + devis lié (réf. BESOIN-{id}) comme en production (postulation artisan).
+     */
+    private function seedArtisanBesoinCandidature(
+        Besoin $besoin,
+        User $artisan,
+        User $client,
+        string $candidatureStatus,
+        string $devisStatus,
+        string $devisTitle,
+        string $profession,
+        int $postedDaysAgo = 2,
+    ): void {
+        $ref = 'BESOIN-'.$besoin->id;
+        $postedAt = Carbon::now()->subDays($postedDaysAgo);
+        $processedAt = in_array($devisStatus, ['valide', 'rejete'], true)
+            ? $postedAt->copy()->addDay()->toDateString()
+            : null;
+
+        $devis = Devis::query()->updateOrCreate(
+            [
+                'user_id' => $artisan->id,
+                'order_reference' => $ref,
+            ],
+            [
+                'client_user_id' => $client->id,
+                'title' => $devisTitle,
+                'client_name' => $client->company_name ?? $client->name,
+                'place' => $besoin->place,
+                'contact' => $client->phone ?? $client->email,
+                'status' => $devisStatus,
+                'processed_at' => $processedAt,
+                'line_items' => [
+                    ['name' => 'Main d’œuvre', 'qty' => 1, 'unit' => 'forfait', 'total' => 450000],
+                    ['name' => 'Fournitures', 'qty' => 1, 'unit' => 'lot', 'total' => 280000],
+                ],
+                'notes' => 'Devis seed MobileTestContentSeeder — validation BTP / particulier.',
+            ]
+        );
+
+        DB::table('devis')->where('id', $devis->id)->update([
+            'created_at' => $postedAt,
+            'updated_at' => $postedAt,
+        ]);
+
+        Candidature::query()->updateOrCreate(
+            [
+                'besoin_id' => $besoin->id,
+                'applicant_id' => $artisan->id,
+            ],
+            [
+                'display_name' => $artisan->name,
+                'profession' => $profession,
+                'status' => $candidatureStatus,
+                'posted_at' => $postedAt,
+                'message' => 'Proposition de devis transmise (n° '.$devis->id.').',
+            ]
+        );
+
+        if ($candidatureStatus === 'accepte' || $devisStatus === 'valide') {
+            $besoin->update(['status' => 'in_progress']);
+        } elseif ($besoin->status === 'in_progress' && $candidatureStatus === 'recu' && $devisStatus === 'envoye') {
+            $besoin->update(['status' => 'open']);
+        }
+    }
+
+    /**
+     * @param  list<Besoin>  $besoins
+     */
+    private function refreshBesoinCandidatureCounts(array $besoins): void
+    {
+        foreach ($besoins as $b) {
+            $n = Candidature::query()->where('besoin_id', $b->id)->count();
+            $b->update(['candidature_count' => $n]);
+        }
     }
 
     /**

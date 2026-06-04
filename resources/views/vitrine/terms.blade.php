@@ -100,4 +100,14 @@
             <p class="muted" style="margin-top:0.75rem"><strong>Dernière mise à jour :</strong> {{ now()->format('d/m/Y') }}</p>
         </section>
     </div>
+
+    <section class="card" style="margin-top:1.25rem">
+        <div class="card-title"><span>6. Responsabilité</span></div>
+        <p class="muted">BATITRAVOO met en relation des professionnels et des particuliers. Les prestations sont conclues directement entre les parties. La plateforme n’est pas partie aux contrats de travaux ou de fourniture, sauf mention contraire.</p>
+    </section>
+
+    <section class="card" style="margin-top:1.25rem">
+        <div class="card-title"><span>7. Documents légaux associés</span></div>
+        <p>Consultez également notre <a href="{{ route('vitrine.privacy') }}">politique de confidentialité</a>.</p>
+    </section>
 @endsection

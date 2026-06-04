@@ -8,6 +8,7 @@ use App\Models\Candidature;
 use App\Models\Devis;
 use App\Models\InAppNotification;
 use App\Models\User;
+use App\Services\BesoinDevisSyncService;
 use App\Services\DevisStockService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -106,6 +107,9 @@ class DevisController extends Controller
         ]);
 
         $owner = User::query()->findOrFail($data['owner_user_id']);
+        if ((int) $owner->id === (int) $u->id) {
+            return response()->json(['message' => 'Vous ne pouvez pas commander chez vous-même.'], 422);
+        }
         if (! in_array($owner->profile_type, [
             User::PROFILE_ENTREPRENEUR_BATIMENT,
             User::PROFILE_ENTREPRISE_FOURNISSEUR,
@@ -116,12 +120,13 @@ class DevisController extends Controller
 
         $toOtherPrestataire = (int) $owner->id !== (int) $u->id;
 
-        // Particulier, entrepreneur ou fournisseur : demande de devis à un autre prestataire (ex. marketplace).
+        // Client → autre prestataire (marketplace, panier fournisseur, demande de devis).
         if ($toOtherPrestataire) {
             if (! in_array($u->profile_type, [
                 User::PROFILE_PARTICULIER,
                 User::PROFILE_ENTREPRENEUR_BATIMENT,
                 User::PROFILE_ENTREPRISE_FOURNISSEUR,
+                User::PROFILE_ARTISAN,
             ], true)) {
                 return response()->json(['message' => 'Profil non autorisé pour cette action.'], 403);
             }
@@ -133,7 +138,7 @@ class DevisController extends Controller
                 'client_name' => $data['client_name'],
                 'order_reference' => $data['order_reference'] ?? null,
                 'place' => $data['place'] ?? null,
-                'contact' => $data['contact'] ?? null,
+                'contact' => $this->defaultClientContact($u, $data['contact'] ?? null),
                 'line_items' => $data['line_items'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'status' => 'non_traite',
@@ -297,11 +302,16 @@ class DevisController extends Controller
 
         $willValidate = (string) $devis->status === 'valide' && $previousStatus !== 'valide';
 
-        DB::transaction(function () use ($devis, $willValidate, $stockService): void {
+        DB::transaction(function () use ($devis, $willValidate, $stockService, $previousStatus): void {
             $devis->save();
             if ($willValidate) {
                 $stockService->deductForValidatedOrder($devis->fresh());
             }
+            app(BesoinDevisSyncService::class)->syncAfterDevisStatusChange(
+                $devis->fresh(),
+                (string) $devis->status,
+                $previousStatus,
+            );
         });
 
         $devis->load(['user', 'clientUser']);
@@ -383,6 +393,8 @@ class DevisController extends Controller
             'is_marketplace_request' => $this->isMarketplaceRequest($d),
             'prestataire_name' => $this->displayName($provider),
             'prestataire_profile_type' => $provider?->profile_type,
+            'client_phone' => $this->clientPhoneForPrestataire($d, $client),
+            'client_email' => $this->clientEmailForPrestataire($d, $client),
         ];
         if ($full) {
             $r['line_items'] = $d->line_items;
@@ -430,5 +442,59 @@ class DevisController extends Controller
         $name = trim((string) ($user->name ?? ''));
 
         return $name !== '' ? $name : null;
+    }
+
+    private function defaultClientContact(User $client, mixed $contact): ?string
+    {
+        $c = trim((string) ($contact ?? ''));
+        if ($c !== '') {
+            return $c;
+        }
+        $phone = trim((string) ($client->phone ?? ''));
+        if ($phone !== '') {
+            return $phone;
+        }
+        $email = trim((string) ($client->email ?? ''));
+
+        return $email !== '' ? $email : null;
+    }
+
+    private function clientPhoneForPrestataire(Devis $d, ?User $client): ?string
+    {
+        $contact = trim((string) ($d->contact ?? ''));
+        if ($contact !== '' && ! str_contains($contact, '@')) {
+            return $contact;
+        }
+        if ($client === null) {
+            return null;
+        }
+        $phone = trim((string) ($client->phone ?? ''));
+        if ($phone !== '') {
+            return $phone;
+        }
+        $mgr = trim((string) ($client->manager_contact ?? ''));
+        if ($mgr !== '' && ! str_contains($mgr, '@')) {
+            return $mgr;
+        }
+
+        return null;
+    }
+
+    private function clientEmailForPrestataire(Devis $d, ?User $client): ?string
+    {
+        $contact = trim((string) ($d->contact ?? ''));
+        if ($contact !== '' && str_contains($contact, '@')) {
+            return $contact;
+        }
+        if ($client === null) {
+            return null;
+        }
+        $email = trim((string) ($client->email ?? ''));
+        if ($email !== '') {
+            return $email;
+        }
+        $contactEmail = trim((string) ($client->contact_email ?? ''));
+
+        return $contactEmail !== '' ? $contactEmail : null;
     }
 }

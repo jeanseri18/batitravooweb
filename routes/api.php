@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\Me\ProfileController;
 use App\Http\Controllers\Api\Me\ServiceController as MeServiceController;
 use App\Http\Controllers\Api\Me\SupportTicketController;
 use App\Http\Controllers\Api\Me\UserDocumentController;
+use App\Http\Controllers\Api\PublicArtisanBusinessCardController;
 use App\Http\Controllers\Api\PublicBesoinController;
 use App\Http\Controllers\Api\PublicCategoryController;
 use App\Http\Controllers\Api\PublicMarketplaceProviderController;
@@ -43,6 +44,7 @@ Route::get('/products', [PublicProductController::class, 'index']);
 Route::get('/products/{product}', [PublicProductController::class, 'show'])->whereNumber('product');
 Route::get('/services', [PublicServiceController::class, 'index']);
 Route::get('/services/{service}', [PublicServiceController::class, 'show'])->whereNumber('service');
+Route::get('/artisans/{user}/carte-visite', [PublicArtisanBusinessCardController::class, 'show'])->whereNumber('user');
 Route::get('/besoins', [PublicBesoinController::class, 'index']);
 Route::get('/besoins/{besoin}', [PublicBesoinController::class, 'show'])->whereNumber('besoin');
 Route::get('/help/faqs', [HelpFaqController::class, 'index']);
@@ -64,6 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/me/documents', [UserDocumentController::class, 'index']);
         Route::post('/me/documents', [UserDocumentController::class, 'store']);
+        Route::get('/me/documents/{document}/file', [UserDocumentController::class, 'download'])->whereNumber('document');
         Route::delete('/me/documents/{document}', [UserDocumentController::class, 'destroy'])->whereNumber('document');
 
         Route::get('/me/tickets', [SupportTicketController::class, 'index']);
@@ -108,6 +111,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/me/candidatures/{candidature}', [CandidatureController::class, 'update'])->whereNumber('candidature');
 
         Route::get('/me/messages/conversations', [MessageController::class, 'conversationPartners']);
+        Route::get('/me/messages/unread-count', [MessageController::class, 'unreadCount']);
         Route::get('/me/messages', [MessageController::class, 'index']);
         Route::post('/me/messages', [MessageController::class, 'store']);
         Route::post('/me/messages/mark-read', [MessageController::class, 'markRead']);

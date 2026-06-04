@@ -29,9 +29,36 @@ class MessageController extends Controller
                 'id' => $p->id,
                 'name' => $p->name,
                 'profile_type' => $p->profile_type,
+                'unread_count' => (int) Message::query()
+                    ->where('receiver_id', $u->id)
+                    ->where('sender_id', $p->id)
+                    ->whereNull('read_at')
+                    ->count(),
             ]);
 
-        return response()->json(['data' => $peers]);
+        return response()->json([
+            'data' => $peers,
+            'meta' => [
+                'unread_count' => $this->totalUnreadFor($u),
+            ],
+        ]);
+    }
+
+    public function unreadCount(Request $request): JsonResponse
+    {
+        $u = $request->user();
+
+        return response()->json([
+            'unread_count' => $this->totalUnreadFor($u),
+        ]);
+    }
+
+    private function totalUnreadFor(User $u): int
+    {
+        return (int) Message::query()
+            ->where('receiver_id', $u->id)
+            ->whereNull('read_at')
+            ->count();
     }
 
     public function index(Request $request): JsonResponse

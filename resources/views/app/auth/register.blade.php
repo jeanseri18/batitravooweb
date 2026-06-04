@@ -100,11 +100,22 @@
                     <label for="password_confirmation">Confirmer le mot de passe</label>
                     <input type="password" name="password_confirmation" id="password_confirmation" required autocomplete="new-password">
                 </div>
+                <div class="app-field" style="display:flex;align-items:flex-start;gap:0.6rem;margin-bottom:1rem;">
+                    <input type="checkbox" name="accept_terms" id="accept_terms" value="1" required {{ old('accept_terms') ? 'checked' : '' }} style="width:auto;margin:0.35rem 0 0;cursor:pointer;">
+                    <label for="accept_terms" style="margin:0;font-weight:500;cursor:pointer;line-height:1.45;">
+                        J’accepte les <a href="{{ route('vitrine.terms') }}" target="_blank" rel="noopener noreferrer">conditions générales d’utilisation</a>
+                        et la <a href="{{ route('vitrine.privacy') }}" target="_blank" rel="noopener noreferrer">politique de confidentialité</a>.
+                    </label>
+                </div>
+                @error('accept_terms')
+                    <div class="app-error">{{ $message }}</div>
+                @enderror
                 <button type="submit" class="app-btn">Créer mon compte</button>
             </form>
             <p class="app-auth__footer">
                 Déjà inscrit ? <a href="{{ route('login') }}">Se connecter</a>
             </p>
+            @include('app.partials.legal-links')
             <p class="app-auth__footer" style="margin-top:0.75rem;">
                 <a href="{{ url('/') }}">← Retour à la vitrine</a>
             </p>

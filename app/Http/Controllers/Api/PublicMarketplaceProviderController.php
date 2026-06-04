@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\ResolvesOptionalApiUser;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -12,6 +13,8 @@ use Illuminate\Http\Request;
  */
 class PublicMarketplaceProviderController extends Controller
 {
+    use ResolvesOptionalApiUser;
+
     public function index(Request $request): JsonResponse
     {
         $kind = $request->string('kind')->trim()->toString();
@@ -23,6 +26,8 @@ class PublicMarketplaceProviderController extends Controller
             ->whereNotNull('profile_completed_at')
             ->where('profile_validation_status', User::VALIDATION_APPROVED)
             ->whereIn('profile_type', $profileTypes);
+
+        $this->excludeSelfFromMarketplace($q, $request);
 
         $search = $request->string('q')->trim()->toString();
         if ($search !== '') {

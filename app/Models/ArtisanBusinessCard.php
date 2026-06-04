@@ -24,6 +24,7 @@ class ArtisanBusinessCard extends Model
         'avail_unavailable',
         'location_text',
         'portfolio_path',
+        'portfolio_paths',
     ];
 
     /**
@@ -38,6 +39,7 @@ class ArtisanBusinessCard extends Model
             'avail_appointment' => 'boolean',
             'avail_unavailable' => 'boolean',
             'services' => 'array',
+            'portfolio_paths' => 'array',
         ];
     }
 

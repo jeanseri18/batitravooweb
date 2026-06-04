@@ -945,6 +945,42 @@ main.app-content:focus {
     text-decoration: underline;
 }
 
+.app-legal-links {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.app-legal-links a {
+    color: var(--orange);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.app-legal-links a:hover {
+    text-decoration: underline;
+}
+
+.app-legal-links__sep {
+    margin: 0 0.35rem;
+    opacity: 0.5;
+}
+
+.app-legal-footer {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border, #e8ecf1);
+}
+
+.app-legal-footer__copy {
+    margin: 0.5rem 0 0;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 @media (max-width: 960px) {
     .app-auth {
         grid-template-columns: 1fr;

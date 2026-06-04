@@ -53,6 +53,7 @@
             <p class="app-auth__footer">
                 Pas encore de compte ? <a href="{{ route('register') }}">Créer un compte</a>
             </p>
+            @include('app.partials.legal-links')
             <p class="app-auth__footer" style="margin-top:0.75rem;">
                 <a href="{{ url('/') }}">← Retour à la vitrine</a>
                 @if (Route::has('admin.login'))

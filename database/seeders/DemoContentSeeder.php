@@ -283,6 +283,39 @@ class DemoContentSeeder extends Seeder
         foreach ($cands as $c) {
             /** @var Besoin $b */
             [$b, $applicant, $status, $display, $prof] = $c;
+            $postedAt = now()->subDays(rand(1, 14));
+            $besoinOwner = User::query()->find($b->user_id);
+            $devis = null;
+
+            if ($besoinOwner && in_array($applicant->profile_type, [User::PROFILE_ARTISAN], true)) {
+                $devisStatus = match ($status) {
+                    'accepte' => 'valide',
+                    'rejete' => 'rejete',
+                    default => 'envoye',
+                };
+                $devis = Devis::query()->updateOrCreate(
+                    [
+                        'user_id' => $applicant->id,
+                        'order_reference' => 'BESOIN-'.$b->id,
+                    ],
+                    [
+                        'client_user_id' => $besoinOwner->id,
+                        'title' => 'Devis — '.$b->title,
+                        'client_name' => $besoinOwner->company_name ?? $besoinOwner->name,
+                        'place' => $b->place,
+                        'contact' => $besoinOwner->phone ?? $besoinOwner->email,
+                        'status' => $devisStatus,
+                        'processed_at' => in_array($devisStatus, ['valide', 'rejete'], true)
+                            ? $postedAt->copy()->addDay()->toDateString()
+                            : null,
+                        'line_items' => [
+                            ['name' => 'Main d’œuvre', 'qty' => 1, 'unit' => 'forfait', 'total' => 380000],
+                        ],
+                        'notes' => 'Devis seed DemoContentSeeder.',
+                    ]
+                );
+            }
+
             Candidature::query()->updateOrCreate(
                 [
                     'besoin_id' => $b->id,
@@ -292,8 +325,10 @@ class DemoContentSeeder extends Seeder
                     'display_name' => $display,
                     'profession' => $prof,
                     'status' => $status,
-                    'posted_at' => now()->subDays(rand(1, 14)),
-                    'message' => 'Candidature démo — alignement écran candidature entrepreneur.',
+                    'posted_at' => $postedAt,
+                    'message' => $devis !== null
+                        ? 'Proposition de devis transmise (n° '.$devis->id.').'
+                        : 'Candidature démo — alignement écran candidature entrepreneur.',
                 ]
             );
         }
@@ -326,7 +361,14 @@ class DemoContentSeeder extends Seeder
                 'company_address' => $address,
             ]
         );
-        $u->forceFill(['created_at' => $createdAt, 'updated_at' => now()])->saveQuietly();
+        $extras = ['created_at' => $createdAt, 'updated_at' => now()];
+        if ($profile === User::PROFILE_ARTISAN || $profile === User::PROFILE_ENTREPRENEUR_BATIMENT
+            || $profile === User::PROFILE_ENTREPRISE_FOURNISSEUR) {
+            $extras['profile_completed_at'] = $createdAt;
+            $extras['profile_validation_status'] = User::VALIDATION_APPROVED;
+            $extras['profile_validated_at'] = $createdAt;
+        }
+        $u->forceFill($extras)->saveQuietly();
 
         return $u->fresh();
     }

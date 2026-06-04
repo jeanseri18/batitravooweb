@@ -30,15 +30,12 @@ class CompleteProfileController extends Controller
             return response()->json(['message' => 'Profil non défini.'], 422);
         }
 
-        $validated = $request->validate($this->rulesForProfile($type));
+        $validated = $request->validate($this->rulesForProfile($type, $user));
         $this->assertUploadedDocumentsWhenNeeded($request, $user, $type);
 
         DB::transaction(function () use ($user, $validated, $request, $type): void {
             $this->applyValidatedUserFields($user, $validated, $type);
-            $user->profile_completed_at = now();
-            $user->profile_validation_status = User::VALIDATION_PENDING;
-            $user->profile_validation_note = null;
-            $user->profile_validated_at = null;
+            $this->applyProfileCompletionAndValidation($user);
             $user->save();
 
             $this->syncUploadedDocuments($user, $request, $type);
@@ -56,8 +53,32 @@ class CompleteProfileController extends Controller
     }
 
     /**
-     * @return array<string, mixed>
+     * Validation admin : uniquement à la première soumission du profil, ou après refus / demande de corrections.
+     * Les mises à jour d’un compte déjà validé ne réinitialisent pas le statut.
      */
+    private function applyProfileCompletionAndValidation(User $user): void
+    {
+        $isFirstCompletion = $user->profile_completed_at === null;
+        $wasApproved = $user->profile_validation_status === User::VALIDATION_APPROVED;
+
+        if ($isFirstCompletion) {
+            $user->profile_completed_at = now();
+            $user->profile_validation_status = User::VALIDATION_PENDING;
+            $user->profile_validation_note = null;
+            $user->profile_validated_at = null;
+
+            return;
+        }
+
+        if ($wasApproved) {
+            return;
+        }
+
+        $user->profile_validation_status = User::VALIDATION_PENDING;
+        $user->profile_validation_note = null;
+        $user->profile_validated_at = null;
+    }
+
     /**
      * Si aucun fichier n’est envoyé, une pièce déjà enregistrée pour ce type suffit (mise à jour du profil).
      *
@@ -68,11 +89,40 @@ class CompleteProfileController extends Controller
         if ($type === User::PROFILE_ENTREPRENEUR_BATIMENT || $type === User::PROFILE_ENTREPRISE_FOURNISSEUR) {
             return;
         }
+
+        $requiredFields = match ($type) {
+            User::PROFILE_PARTICULIER => ['document_cni', 'document_other'],
+            User::PROFILE_ARTISAN => ['document_cni', 'document_certificate'],
+            default => [],
+        };
+
+        $errors = [];
+        foreach ($requiredFields as $field) {
+            if ($request->hasFile($field)) {
+                continue;
+            }
+            $kind = match ($field) {
+                'document_cni' => UserDocument::KIND_CNI,
+                'document_other' => UserDocument::KIND_OTHER,
+                'document_certificate' => UserDocument::KIND_CERTIFICATE,
+                default => null,
+            };
+            if ($kind === null || ! $user->documents()->where('kind', $kind)->exists()) {
+                $errors[$field] = ['Ce document est obligatoire.'];
+            }
+        }
+
+        if ($errors !== []) {
+            throw ValidationException::withMessages($errors);
+        }
     }
 
-    private function rulesForProfile(string $type): array
+    private function rulesForProfile(string $type, User $user): array
     {
-        $file = ['required', 'file', 'max:'.self::MAX_UPLOAD_KB];
+        $isUpdate = $user->profile_completed_at !== null;
+        $file = $isUpdate
+            ? ['nullable', 'file', 'max:'.self::MAX_UPLOAD_KB]
+            : ['required', 'file', 'max:'.self::MAX_UPLOAD_KB];
         $fileNullable = ['nullable', 'file', 'max:'.self::MAX_UPLOAD_KB];
 
         return match ($type) {

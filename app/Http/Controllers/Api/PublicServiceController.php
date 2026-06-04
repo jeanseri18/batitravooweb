@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Api\Concerns\FormatsServiceApi;
+use App\Http\Controllers\Api\Concerns\ResolvesOptionalApiUser;
 use App\Http\Controllers\Controller;
 use App\Models\Service;
 use App\Models\User;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 class PublicServiceController extends Controller
 {
     use FormatsServiceApi;
+    use ResolvesOptionalApiUser;
 
     public function index(Request $request): JsonResponse
     {
@@ -24,6 +26,10 @@ class PublicServiceController extends Controller
                 ])->where('is_active', true);
             })
             ->with(['category', 'user']);
+
+        if (! $request->filled('user_id')) {
+            $this->excludeSelfFromMarketplace($q, $request, 'user_id');
+        }
 
         $kind = $request->string('service_kind')->trim()->toString();
         if ($kind !== '') {

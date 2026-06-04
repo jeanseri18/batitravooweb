@@ -52,9 +52,9 @@
                 <span class="app-workflow-tile__row">@include('app.partials.app-nav-icon', ['name' => 'rocket'])<span class="app-workflow-tile__title">Opportunités</span></span>
                 <span class="app-workflow-tile__hint">Besoins BTP</span>
             </a>
-            <a href="{{ route('app.artisan.candidatures') }}" class="app-workflow-tile {{ $page === 'candidatures' ? 'is-active' : '' }}">
+            <a href="{{ route('app.artisan.devis') }}" class="app-workflow-tile {{ str_starts_with($page, 'devis') ? 'is-active' : '' }}">
                 <span class="app-workflow-tile__row">@include('app.partials.app-nav-icon', ['name' => 'inbox'])<span class="app-workflow-tile__title">Missions reçues</span></span>
-                <span class="app-workflow-tile__hint">Candidatures</span>
+                <span class="app-workflow-tile__hint">Demandes de devis</span>
             </a>
             <a href="{{ route('app.artisan.devis') }}" class="app-workflow-tile {{ str_starts_with($page, 'devis') ? 'is-active' : '' }}">
                 <span class="app-workflow-tile__row">@include('app.partials.app-nav-icon', ['name' => 'document'])<span class="app-workflow-tile__title">Mes devis</span></span>

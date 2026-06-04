@@ -22,7 +22,7 @@
     <a href="{{ route('app.artisan.services') }}" class="{{ in_array($p, ['services_manage', 'service_form'], true) ? 'is-active' : '' }}">@include('app.partials.app-nav-icon', ['name' => 'wrench'])<span>Mes services</span></a>
     <a href="{{ route('app.artisan.business_card') }}" class="{{ $p === 'artisan_carte_visite' ? 'is-active' : '' }}">@include('app.partials.app-nav-icon', ['name' => 'briefcase'])<span>Ma carte de visite</span></a>
     <a href="{{ route('app.artisan.marketplace', ['tab' => 'besoins']) }}" class="{{ $p === 'marketplace' && request('tab', 'besoins') === 'besoins' ? 'is-active' : '' }}">@include('app.partials.app-nav-icon', ['name' => 'rocket'])<span>Opportunités (besoins)</span></a>
-    <a href="{{ route('app.artisan.candidatures') }}" class="{{ $p === 'candidatures' ? 'is-active' : '' }}">@include('app.partials.app-nav-icon', ['name' => 'inbox'])<span>Missions reçues</span></a>
+    <a href="{{ route('app.artisan.devis') }}" class="{{ str_starts_with($p, 'devis') ? 'is-active' : '' }}">@include('app.partials.app-nav-icon', ['name' => 'inbox'])<span>Missions reçues</span></a>
     <a href="{{ route('app.artisan.devis') }}" class="{{ str_starts_with($p, 'devis') ? 'is-active' : '' }}">@include('app.partials.app-nav-icon', ['name' => 'document'])<span>Mes devis</span></a>
     <a href="{{ route('app.artisan.documents') }}" class="{{ $p === 'documents' ? 'is-active' : '' }}">@include('app.partials.app-nav-icon', ['name' => 'paperclip'])<span>Documents</span></a>
     <a href="{{ route('app.artisan.support') }}" class="{{ str_starts_with($p, 'support') ? 'is-active' : '' }}">@include('app.partials.app-nav-icon', ['name' => 'support'])<span>Support</span></a>

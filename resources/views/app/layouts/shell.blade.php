@@ -109,6 +109,7 @@
                     </div>
                 @endif
                 @yield('content')
+                @include('app.partials.legal-footer')
                 </div>
             </main>
         </div>

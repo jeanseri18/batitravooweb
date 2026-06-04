@@ -90,4 +90,14 @@
             <p class="muted" style="margin-top:0.75rem"><strong>Dernière mise à jour :</strong> {{ now()->format('d/m/Y') }}</p>
         </section>
     </div>
+
+    <section class="card" style="margin-top:1.25rem">
+        <div class="card-title"><span>Cookies & traceurs</span></div>
+        <p class="muted">Des cookies techniques peuvent être utilisés pour le fonctionnement du site et de l’application. Vous pouvez configurer votre navigateur pour les limiter.</p>
+    </section>
+
+    <section class="card" style="margin-top:1.25rem">
+        <div class="card-title"><span>Documents associés</span></div>
+        <p>Consultez nos <a href="{{ route('vitrine.terms') }}">conditions générales d’utilisation</a>.</p>
+    </section>
 @endsection
