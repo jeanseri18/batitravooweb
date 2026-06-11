@@ -24,16 +24,21 @@
     };
 @endphp
 
+<div class="app-page-stack--split">
 <div class="app-manage-toolbar app-card">
-    <a href="{{ route('app.'.$mp.'.besoins.create') }}" class="app-btn app-btn--inline app-btn--sm">Créer un besoin</a>
     <a href="{{ route('app.'.$mp.'.candidatures') }}" class="app-btn app-btn--secondary app-btn--sm">Voir les candidatures</a>
     <a href="{{ route('app.'.$mp.'.marketplace', ['tab' => 'besoins']) }}" class="app-btn app-btn--secondary app-btn--sm">Marketplace besoins</a>
 </div>
 
-<div class="app-card app-mt">
-    <div class="app-flex-between app-mb-sm" style="flex-wrap:wrap;gap:0.65rem;">
-        <h2 class="app-section-title" style="margin:0;">{{ $sectionTitle }}</h2>
-        <a href="{{ route('app.'.$mp.'.besoins.create') }}" class="app-btn app-btn--inline">Nouveau besoin</a>
+<div class="app-card">
+    <div class="app-page-head">
+        <div class="app-page-head__main">
+            <h2 class="app-page-head__title">{{ $sectionTitle }}</h2>
+            <p class="app-page-head__desc">Publiez et suivez vos besoins, puis consultez les candidatures reçues.</p>
+        </div>
+        <div class="app-page-head__actions">
+            <a href="{{ route('app.'.$mp.'.besoins.create') }}" class="app-btn app-btn--inline app-btn--sm">Nouveau besoin</a>
+        </div>
     </div>
     @if (! empty($besoinsList) && count($besoinsList))
         <div class="app-table-wrap">
@@ -42,6 +47,7 @@
                     <tr>
                         <th>Titre</th>
                         <th>Budget</th>
+                        <th>Début</th>
                         <th>Lieu</th>
                         <th>Réponses</th>
                         <th>Statut</th>
@@ -57,6 +63,7 @@
                         <tr>
                             <td><strong>{{ $row['title'] ?? '—' }}</strong></td>
                             <td class="app-muted">{{ $row['budget'] ?? '—' }}</td>
+                            <td class="app-muted">{{ $row['start_label'] ?? ($row['short_date'] ?? '—') }}</td>
                             <td class="app-muted">{{ $row['place'] ?? '—' }}</td>
                             <td>
                                 @if ($nCand > 0 && $bid > 0)
@@ -67,22 +74,22 @@
                             </td>
                             <td><span class="app-pill">{{ $statusBesoin($row['status'] ?? null) }}</span></td>
                             <td class="app-table__col-actions">
-                                <span class="app-action-links">
-                                    <a href="{{ route('app.'.$mp.'.marketplace.besoin', ['besoin' => $bid]) }}">Fiche publique</a>
-                                    @if ($bid > 0 && $nCand > 0)
-                                        <span class="app-muted"> · </span>
-                                        <a href="{{ $mkBesoinCandLink($bid) }}">Candidatures</a>
-                                    @endif
-                                    @if ($bid > 0 && in_array($mp, ['particulier', 'batiment'], true))
-                                        <span class="app-muted"> · </span>
-                                        <a href="{{ route('app.'.$mp.'.besoins.edit', ['besoin' => $bid]) }}" class="app-text-link">Modifier</a>
-                                        <form action="{{ route('app.'.$mp.'.besoins.destroy', ['besoin' => $bid]) }}" method="post" class="app-inline-form" onsubmit="return confirm('Supprimer ce besoin ?');" style="display:inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="app-text-link app-text-link--danger">Supprimer</button>
-                                        </form>
-                                    @endif
-                                </span>
+                                @php
+                                    $besoinActions = [
+                                        ['type' => 'link', 'label' => 'Fiche publique', 'href' => route('app.'.$mp.'.marketplace.besoin', ['besoin' => $bid])],
+                                    ];
+                                    if ($bid > 0 && $nCand > 0) {
+                                        $besoinActions[] = ['type' => 'link', 'label' => 'Candidatures', 'href' => $mkBesoinCandLink($bid)];
+                                    }
+                                    if ($bid > 0 && in_array($mp, ['particulier', 'batiment'], true)) {
+                                        $besoinActions[] = ['type' => 'link', 'label' => 'Modifier', 'href' => route('app.'.$mp.'.besoins.edit', ['besoin' => $bid])];
+                                        $besoinActions[] = ['type' => 'form', 'label' => 'Supprimer', 'action' => route('app.'.$mp.'.besoins.destroy', ['besoin' => $bid]), 'method' => 'DELETE', 'confirm' => 'Supprimer ce besoin ?', 'danger' => true];
+                                    }
+                                @endphp
+                                @include('app.shell.partials.table_actions_dropdown', [
+                                    'menuId' => 'besoin-actions-'.$bid,
+                                    'actions' => $besoinActions,
+                                ])
                             </td>
                         </tr>
                     @endforeach
@@ -91,9 +98,10 @@
         </div>
     @else
         <p class="app-muted app-mb-sm">Aucun besoin publié pour le moment.</p>
-        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+        <div class="app-actions-row">
             <a href="{{ route('app.'.$mp.'.besoins.create') }}" class="app-btn app-btn--inline">Publier un besoin</a>
             <a href="{{ route('app.'.$mp.'.marketplace', ['tab' => 'besoins']) }}" class="app-btn app-btn--secondary app-btn--inline">Voir le marketplace</a>
         </div>
     @endif
+</div>
 </div>

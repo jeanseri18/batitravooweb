@@ -52,6 +52,7 @@ class FournisseurProductWebController extends ShellController
             'image' => ['nullable', 'image', 'max:10240'],
             'price_amount' => ['required', 'integer', 'min:0'],
             'stock_units' => ['required', 'integer', 'min:0'],
+            'unit_of_measure' => ['nullable', 'string', 'in:'.implode(',', array_keys(Product::unitOptions()))],
         ]);
 
         $imagePath = null;
@@ -70,6 +71,7 @@ class FournisseurProductWebController extends ShellController
             'image_path' => $imagePath,
             'price_amount' => $data['price_amount'],
             'stock_units' => $data['stock_units'],
+            'unit_of_measure' => $data['unit_of_measure'] ?? Product::UNIT_PIECE,
             'status' => 'approved',
         ]);
 
@@ -87,6 +89,7 @@ class FournisseurProductWebController extends ShellController
             'image' => ['nullable', 'image', 'max:10240'],
             'price_amount' => ['required', 'integer', 'min:0'],
             'stock_units' => ['required', 'integer', 'min:0'],
+            'unit_of_measure' => ['nullable', 'string', 'in:'.implode(',', array_keys(Product::unitOptions()))],
         ]);
 
         if ($request->hasFile('image')) {
@@ -106,6 +109,7 @@ class FournisseurProductWebController extends ShellController
             'description' => $data['description'] ?? null,
             'price_amount' => $data['price_amount'],
             'stock_units' => $data['stock_units'],
+            'unit_of_measure' => $data['unit_of_measure'] ?? Product::UNIT_PIECE,
         ]);
         if (isset($data['image_path'])) {
             $product->image_path = $data['image_path'];

@@ -2,7 +2,7 @@
   Logo marque : PNG si présent (public/images/logo.png), sinon images/logo.svg,
   sinon SVG inline. Variante « inverse » pour fonds marine (auth hero, en-tête compléter profil).
   @param string|null $variant « inverse »
-  @param string $size sidebar | sm | hero
+  @param string $size sidebar | header | sm | hero
 --}}
 @php
     $inverse = ($variant ?? '') === 'inverse';

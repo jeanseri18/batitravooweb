@@ -1,51 +1,44 @@
 @if ($profileSlug === 'fournisseur')
-    @php
-        $u = $profileData['user'] ?? [];
-        $company = trim((string) ($u['company_name'] ?? ''));
-        $displayName = $company !== '' ? $company : (string) ($u['name'] ?? 'Fournisseur');
-        $initials = mb_strtoupper(mb_substr(preg_replace('/\s+/', '', $displayName), 0, 2));
-        if ($initials === '') {
-            $initials = '?';
-        }
-    @endphp
+    @include('app.shell.partials.home_hero', [
+        'heroCtaLabel' => '+ Ajouter un produit',
+        'heroCtaUrl' => route('app.fournisseur.products.create'),
+    ])
 
-    <div class="app-card app-card--flush app-fournisseur-home-head">
-        <div class="app-fournisseur-home-head__row">
-            <div class="app-fournisseur-home-head__avatar">
-                @if (! empty($u['avatar_url']))
-                    <img src="{{ $u['avatar_url'] }}" alt="" width="48" height="48" class="app-fournisseur-home-head__avatar-img">
-                @else
-                    <span class="app-fournisseur-home-head__avatar-ph">{{ $initials }}</span>
-                @endif
-            </div>
-            <div class="app-fournisseur-home-head__greet">
-                <span class="app-muted app-fournisseur-home-head__hi">Bonjour,</span>
-                <strong class="app-fournisseur-home-head__name">{{ $displayName }}</strong>
-            </div>
-        </div>
-    </div>
+    @if (! empty($dashboard['kpis']))
+        @include('app.shell.partials.dashboard_metrics')
+    @endif
 
-    <div class="app-card app-mt">
-        <label for="supplier-home-search" class="app-muted app-text-sm">Recherche dans mes produits</label>
-        <input type="search" id="supplier-home-search" class="app-input app-input--rounded app-mt-sm" placeholder="Filtrer par titre…" autocomplete="off">
-    </div>
+    @include('app.shell.partials.home_search', [
+        'searchLabel' => 'Recherche dans mes produits',
+        'searchPlaceholder' => 'Filtrer par titre…',
+        'searchId' => 'supplier-home-search',
+        'searchLocal' => true,
+    ])
 
     @include('app.shell.partials.home_shortcuts')
 
-    <div class="app-card app-mt">
-        <h2 class="app-section-title">Produits récemment publiés</h2>
+    <section class="app-home-block app-home-block--products" aria-labelledby="supplier-home-products-title">
+        @include('app.shell.partials.home_section_head', [
+            'title' => 'Produits récemment publiés',
+            'scrollTarget' => '#supplier-home-grid',
+            'sectionId' => 'supplier-home-products-title',
+        ])
+        <div class="app-card app-home-products app-home-section">
+        <p class="app-home-block__actions app-mb-sm">
+            <a href="{{ route('app.fournisseur.products') }}" class="app-text-link">Voir tout le catalogue</a>
+        </p>
         @if (empty($supplierProducts) || ! count($supplierProducts))
-            <p class="app-muted">Aucun produit en base pour le moment. Ajoutez des articles depuis « Catalogue produits ».</p>
+            <p class="app-muted app-mt-sm">Aucun produit en base pour le moment. Ajoutez des articles depuis « Catalogue produits ».</p>
         @else
-            <div id="supplier-home-grid" class="app-supplier-home-grid">
+            <div id="supplier-home-grid" class="app-supplier-home-grid app-home-carousel app-mt-sm">
                 @foreach ($supplierProducts as $p)
                     @php
                         $title = (string) ($p['title'] ?? '');
                         $slugTitle = \Illuminate\Support\Str::lower($title);
                     @endphp
                     <article class="app-supplier-home-tile" data-title-search="{{ e($slugTitle) }}">
-                        <span class="app-supplier-home-tile__badge">{{ (int) ($p['views_count'] ?? 0) }} vues</span>
                         <div class="app-supplier-home-tile__img-wrap">
+                            <span class="app-supplier-home-tile__badge">{{ (int) ($p['views_count'] ?? 0) }} vues</span>
                             @if (! empty($p['image_url']))
                                 <img src="{{ $p['image_url'] }}" alt="" class="app-supplier-home-tile__img">
                             @else
@@ -53,14 +46,19 @@
                             @endif
                         </div>
                         <h3 class="app-supplier-home-tile__title">{{ $title ?: '—' }}</h3>
-                        <p class="app-supplier-home-tile__price">{{ $p['price_display_fr'] ?? '—' }}</p>
-                        <p class="app-supplier-home-tile__stock">Stock : {{ (int) ($p['stock_units'] ?? 0) }}</p>
+                        @if (! empty($p['price_display_fr']))
+                            <p class="app-supplier-home-tile__price">{{ $p['price_display_fr'] }}</p>
+                        @endif
+                        <p class="app-supplier-home-tile__stock {{ (int) ($p['stock_units'] ?? 0) > 0 ? 'is-in-stock' : '' }}">
+                            {{ (int) ($p['stock_units'] ?? 0) > 0 ? 'En stock' : 'Rupture' }}
+                        </p>
                     </article>
                 @endforeach
             </div>
             <p id="supplier-home-empty" class="app-muted app-mt-md" hidden>Aucun produit ne correspond à votre recherche.</p>
         @endif
-    </div>
+        </div>
+    </section>
 
     @push('scripts')
     <script>

@@ -1,28 +1,51 @@
 @php
-    $periodBase = $metricsPeriodRoute ?? route('app.'.$profileSlug.'.home');
     $dashFull = ($page ?? '') === 'dashboard_tab';
+    $periodBase = $dashFull
+        ? ($metricsPeriodRoute ?? route('app.'.$profileSlug.'.dashboard'))
+        : route('app.'.$profileSlug.'.home');
     $dash = is_array($dashboard ?? null) ? $dashboard : [];
+    $activePeriod = request('period', 'month');
+    if (! in_array($activePeriod, ['week', 'month', 'year'], true)) {
+        $activePeriod = 'month';
+    }
 @endphp
 @if ($dashFull && ! empty($dash['kpis']))
     <h2 class="app-section-title app-mb-sm">Vue d’ensemble</h2>
 @endif
 @if (! empty($dash['kpis']))
-<div class="app-card app-card--flush app-metrics-period">
+@php $kpiIcons = ['chart', 'eye', 'cart', 'document', 'stack', 'bell']; @endphp
+@if (! $dashFull)
+<section class="app-home-block app-home-block--kpi" aria-labelledby="home-kpi-title">
+    @include('app.shell.partials.home_section_head', [
+        'title' => 'Indicateurs clés',
+        'scrollTarget' => '#home-kpi-carousel',
+        'sectionId' => 'home-kpi-title',
+    ])
+    <div class="app-card app-home-kpi app-home-section">
+@endif
+<div class="app-home-stats">
+@if (! empty($dash['kpis']))
+<div class="app-card app-card--flush app-metrics-period @if (! $dashFull) app-metrics-period--home @endif">
     <p class="app-period-switch app-period-switch--inline">
         <span class="app-muted">Période</span>
-        <a href="{{ $periodBase }}?period=month" class="app-text-link @if(request('period','month')==='month') is-active @endif">Mois</a>
+        <a href="{{ $periodBase }}?period=week" class="app-text-link @if($activePeriod==='week') is-active @endif">Semaine</a>
         <span class="app-muted" aria-hidden="true">·</span>
-        <a href="{{ $periodBase }}?period=year" class="app-text-link @if(request('period')==='year') is-active @endif">Année</a>
+        <a href="{{ $periodBase }}?period=month" class="app-text-link @if($activePeriod==='month') is-active @endif">Mois</a>
+        <span class="app-muted" aria-hidden="true">·</span>
+        <a href="{{ $periodBase }}?period=year" class="app-text-link @if($activePeriod==='year') is-active @endif">Année</a>
     </p>
 </div>
-    <div class="app-kpi-grid">
+@endif
+    <div class="app-kpi-grid app-kpi-grid--home app-home-carousel" id="home-kpi-carousel" role="list">
         @foreach ($dash['kpis'] as $key => $kpi)
             @php
                 $kLabel = (string) ($dash['kpi_labels'][$key] ?? '');
                 $isMoneyKpi = str_ends_with((string) $key, '_fcfa')
                     || str_contains(mb_strtolower($kLabel), 'fcfa');
+                $kpiIcon = $kpiIcons[$loop->index % count($kpiIcons)];
             @endphp
-            <div class="app-kpi-card">
+            <div class="app-kpi-card app-kpi-card--home" role="listitem">
+                <span class="app-kpi-card__icon" aria-hidden="true">@include('app.partials.app-nav-icon', ['name' => $kpiIcon])</span>
                 <div class="app-kpi-card__label">{{ $kLabel !== '' ? $kLabel : \Illuminate\Support\Str::of($key)->replace('_', ' ')->title() }}</div>
                 @if (is_array($kpi) && array_key_exists('value', $kpi))
                     <div class="app-kpi-card__value">
@@ -39,6 +62,11 @@
             </div>
         @endforeach
     </div>
+</div>
+@if (! $dashFull)
+    </div>
+</section>
+@endif
 @endif
 
 @if ($dashFull && ! empty($dash['charts']))

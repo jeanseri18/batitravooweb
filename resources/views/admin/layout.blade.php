@@ -88,8 +88,9 @@
     <title>{{ $title ?? 'Admin' }} — {{ config('app.name', 'BATITRAVOO') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ public_asset('css/admin.css') }}?v=10">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ public_asset('css/admin.css') }}?v=11">
+    <link rel="stylesheet" href="{{ public_asset('css/admin-vitrine.css') }}?v=2">
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
     @stack('styles')
@@ -105,7 +106,9 @@
     {{-- ====== SIDEBAR ====== --}}
     <aside class="admin-side" aria-label="Navigation principale">
         <div class="admin-side__brand">
-            <a href="{{ route('admin.dashboard') }}" class="admin-side__brand-logo" title="BATITRAVOO Admin" aria-label="BATITRAVOO Admin">B</a>
+            <a href="{{ route('admin.dashboard') }}" class="admin-side__brand-logo-link" title="BATITRAVOO Admin" aria-label="BATITRAVOO Admin">
+                @include('admin.partials.brand-logo')
+            </a>
             <div class="admin-side__brand-name">
                 BATITRAVOO
                 <small>Back-office</small>

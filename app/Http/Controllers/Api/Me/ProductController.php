@@ -39,6 +39,7 @@ class ProductController extends Controller
             'image' => ['nullable', 'image', 'max:10240'],
             'price_amount' => ['required', 'integer', 'min:0'],
             'stock_units' => ['required', 'integer', 'min:0'],
+            'unit_of_measure' => ['nullable', 'string', 'in:'.implode(',', array_keys(Product::unitOptions()))],
         ]);
 
         if ($request->hasFile('image')) {
@@ -57,6 +58,7 @@ class ProductController extends Controller
             'image_path' => $data['image_path'] ?? null,
             'price_amount' => $data['price_amount'],
             'stock_units' => $data['stock_units'],
+            'unit_of_measure' => $data['unit_of_measure'] ?? Product::UNIT_PIECE,
             'status' => 'approved',
         ]);
         $product->load('category');
@@ -78,6 +80,7 @@ class ProductController extends Controller
             'image' => ['nullable', 'image', 'max:10240'],
             'price_amount' => ['sometimes', 'integer', 'min:0'],
             'stock_units' => ['sometimes', 'integer', 'min:0'],
+            'unit_of_measure' => ['sometimes', 'string', 'in:'.implode(',', array_keys(Product::unitOptions()))],
         ]);
 
         if ($request->hasFile('image')) {
@@ -148,6 +151,9 @@ class ProductController extends Controller
             'price_amount' => (int) $p->price_amount,
             'price_display_fr' => number_format((int) $p->price_amount, 0, ',', ' ').' FCFA',
             'stock_units' => (int) $p->stock_units,
+            'unit_of_measure' => $p->unit_of_measure ?: Product::UNIT_PIECE,
+            'unit_of_measure_label' => $p->unitLabel(),
+            'stock_display_fr' => $p->stockShortLabel(),
             'views_count' => (int) ($p->views_count ?? 0),
             'status' => $p->status,
             'category_id' => $p->category_id,

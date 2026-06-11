@@ -14,6 +14,13 @@ class PublicBesoinController extends Controller
     {
         $q = Besoin::query()->whereIn('status', ['open', 'in_progress'])->with('user');
 
+        // Opportunités : particuliers, entrepreneurs BTP et fournisseurs uniquement.
+        $q->whereHas('user', static fn ($u) => $u->whereIn('profile_type', [
+            User::PROFILE_PARTICULIER,
+            User::PROFILE_ENTREPRENEUR_BATIMENT,
+            User::PROFILE_ENTREPRISE_FOURNISSEUR,
+        ]));
+
         $search = $request->string('q')->trim()->toString();
         if ($search !== '') {
             $q->where(function ($b) use ($search) {
@@ -29,10 +36,15 @@ class PublicBesoinController extends Controller
                 'profile_type',
                 User::PROFILE_PARTICULIER,
             ));
-        } elseif (in_array($owner, ['pro', 'entrepreneur_batiment'], true)) {
+        } elseif (in_array($owner, ['pro', 'entrepreneur_batiment', 'batiment'], true)) {
             $q->whereHas('user', static fn ($u) => $u->where(
                 'profile_type',
                 User::PROFILE_ENTREPRENEUR_BATIMENT,
+            ));
+        } elseif ($owner === 'fournisseur') {
+            $q->whereHas('user', static fn ($u) => $u->where(
+                'profile_type',
+                User::PROFILE_ENTREPRISE_FOURNISSEUR,
             ));
         }
 

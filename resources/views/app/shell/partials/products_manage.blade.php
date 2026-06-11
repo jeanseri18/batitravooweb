@@ -11,16 +11,23 @@
     };
 @endphp
 
+<div class="app-page-stack--split">
 <div class="app-manage-toolbar app-card">
-    <a href="{{ route('app.'.$mp.'.products.create') }}" class="app-btn app-btn--inline app-btn--sm">Nouveau produit</a>
     <a href="{{ route('app.'.$mp.'.marketplace') }}" class="app-btn app-btn--secondary app-btn--sm">Marketplace</a>
     <a href="{{ route('app.'.$mp.'.messages') }}" class="app-btn app-btn--secondary app-btn--sm">Chat</a>
-    <a href="{{ route('app.'.$mp.'.devis') }}" class="app-btn app-btn--secondary app-btn--sm">Mes commandes</a>
+    <a href="{{ route('app.fournisseur.commandes') }}" class="app-btn app-btn--secondary app-btn--sm">Mes commandes</a>
+    <a href="{{ route('app.fournisseur.devis') }}" class="app-btn app-btn--secondary app-btn--sm">Mes devis</a>
 </div>
 
-<div class="app-card app-mt">
-    <div class="app-flex-between app-mb-sm" style="flex-wrap:wrap;gap:0.65rem;">
-        <h2 class="app-section-title" style="margin:0;">Catalogue</h2>
+<div class="app-card">
+    <div class="app-page-head">
+        <div class="app-page-head__main">
+            <h2 class="app-page-head__title">Catalogue produits</h2>
+            <p class="app-page-head__desc">Gérez vos articles, stocks et statuts de publication.</p>
+        </div>
+        <div class="app-page-head__actions">
+            <a href="{{ route('app.'.$mp.'.products.create') }}" class="app-btn app-btn--inline app-btn--sm">Nouveau produit</a>
+        </div>
     </div>
     @if (! empty($productsList) && count($productsList))
         <div class="app-table-wrap">
@@ -48,16 +55,16 @@
                             <td><span class="app-pill">{{ $productStatus($row['status'] ?? null) }}</span></td>
                             <td class="app-table__col-actions">
                                 @if ($pid > 0)
-                                    <a href="{{ route('app.'.$mp.'.marketplace.product', ['product' => $pid]) }}" class="app-text-link">Fiche publique</a>
-                                    <span class="app-muted"> · </span>
-                                    <a href="{{ route('app.'.$mp.'.products.edit', ['product' => $pid]) }}" class="app-text-link">Modifier</a>
-                                    <form action="{{ route('app.'.$mp.'.products.destroy', ['product' => $pid]) }}" method="post" class="app-inline-form" onsubmit="return confirm('Supprimer ce produit ?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="app-text-link app-text-link--danger">Supprimer</button>
-                                    </form>
+                                    @include('app.shell.partials.table_actions_dropdown', [
+                                        'menuId' => 'product-actions-'.$pid,
+                                        'actions' => [
+                                            ['type' => 'link', 'label' => 'Fiche publique', 'href' => route('app.'.$mp.'.marketplace.product', ['product' => $pid])],
+                                            ['type' => 'link', 'label' => 'Modifier', 'href' => route('app.'.$mp.'.products.edit', ['product' => $pid])],
+                                            ['type' => 'form', 'label' => 'Supprimer', 'action' => route('app.'.$mp.'.products.destroy', ['product' => $pid]), 'method' => 'DELETE', 'confirm' => 'Supprimer ce produit ?', 'danger' => true],
+                                        ],
+                                    ])
                                 @else
-                                    —
+                                    <span class="app-muted">—</span>
                                 @endif
                             </td>
                         </tr>
@@ -69,4 +76,5 @@
         <p class="app-muted app-mb-sm">Aucune référence pour le moment.</p>
         <a href="{{ route('app.'.$mp.'.products.create') }}" class="app-btn app-btn--inline">Ajouter un produit</a>
     @endif
+</div>
 </div>

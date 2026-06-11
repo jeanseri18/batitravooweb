@@ -1,0 +1,1253 @@
+/**
+ * Design mockup Batitravoo — alignement exact maquettes
+ * Navy #002744 · Orange #f19b34 · Fond #ffffff
+ */
+.app-body--workspace {
+    --mockup-navy: #002744;
+    --mockup-orange: #f19b34;
+    --mockup-orange-dark: #e89230;
+    --mockup-bg: #ffffff;
+    --mockup-card-radius: 16px;
+    --font: "DM Sans", system-ui, -apple-system, sans-serif;
+}
+
+.app-body--workspace,
+.app-body--workspace .app-mockup-page {
+    font-family: var(--font);
+    letter-spacing: -0.01em;
+}
+
+.app-body--workspace .app-topbar__title {
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+/* Icônes pages (tuiles, KPI, paramètres, notifications) */
+.app-body--workspace .app-nav-ico-wrap--tile,
+.app-body--workspace .app-workflow-tile .app-nav-ico-wrap,
+.app-body--workspace .app-home-shortcut .app-nav-ico-wrap {
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 12px;
+    background: rgba(241, 155, 52, 0.12);
+}
+
+.app-body--workspace .app-workflow-tile__row .app-nav-ico-wrap {
+    background: rgba(241, 155, 52, 0.14);
+    margin-bottom: 0;
+}
+
+.app-body--workspace .app-kpi-card__icon .app-nav-ico-wrap,
+.app-body--workspace .app-settings-card__icon .app-nav-ico-wrap,
+.app-body--workspace .app-notif-card__icon .app-nav-ico-wrap,
+.app-body--workspace .app-notif-empty__icon .app-nav-ico-wrap {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border-radius: inherit;
+    margin: 0;
+}
+
+.app-body--workspace .app-workflow-tile .app-nav-ico,
+.app-body--workspace .app-home-shortcut .app-nav-ico,
+.app-body--workspace .app-kpi-card__icon .app-nav-ico,
+.app-body--workspace .app-settings-card__icon .app-nav-ico,
+.app-body--workspace .app-notif-card__icon .app-nav-ico {
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--mockup-orange);
+}
+
+.app-body--workspace .app-kpi-card__icon,
+.app-body--workspace .app-settings-card__icon,
+.app-body--workspace .app-notif-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border-radius: 12px;
+    background: rgba(241, 155, 52, 0.12);
+}
+
+.app-body--workspace .app-topbar__icon-btn .app-nav-ico-wrap,
+.app-body--workspace .app-topbar__notif-btn .app-nav-ico-wrap {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 10px;
+    background: #f4f6f8;
+    border: 1px solid #d8e0e8;
+}
+
+.app-body--workspace .app-topbar__notif-btn.has-unread .app-nav-ico-wrap {
+    background: rgba(241, 155, 52, 0.12);
+    border-color: rgba(241, 155, 52, 0.35);
+}
+
+.app-body--workspace .order-card__head-icon .app-nav-ico {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.app-body--workspace .app-content__inner {
+    max-width: 1240px;
+}
+
+/* —— Marketplace onglets pill —— */
+.app-body--workspace .mp-tabview__tabs {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+    padding: 0.3rem;
+    margin: 0.85rem 1rem 0;
+    width: auto;
+    max-width: calc(100% - 2rem);
+    background: #fff;
+    border: 1px solid #d8e0e8;
+    border-radius: 999px;
+    border-bottom: 1px solid #d8e0e8;
+}
+
+.app-body--workspace .mp-tab {
+    flex: 0 1 auto;
+    min-width: 6.5rem;
+    padding: 0.55rem 1.15rem;
+    margin-bottom: 0;
+    border-radius: 999px;
+    border: none;
+    border-bottom: none;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--mockup-navy);
+    background: transparent;
+}
+
+.app-body--workspace .mp-tab:hover {
+    color: var(--mockup-orange);
+    background: rgba(241, 155, 52, 0.08);
+    border-bottom: none;
+}
+
+.app-body--workspace .mp-tab.is-active {
+    background: var(--mockup-orange);
+    color: #fff;
+    font-weight: 800;
+    border: none;
+    border-bottom: none;
+}
+
+.app-body--workspace .mp-toolbar--tabpanel {
+    padding: 0.75rem 1rem 0.85rem;
+    border-bottom: 1px solid #d8e0e8;
+}
+
+.app-body--workspace .mp-toolbar__search {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.3rem 0.25rem 0.85rem;
+    background: #fff;
+    border: 1px solid #d8e0e8;
+    border-radius: 12px;
+    min-height: 2.6rem;
+}
+
+.app-body--workspace .mp-toolbar__input {
+    border: none !important;
+    background: transparent !important;
+    padding: 0.45rem 0 !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+}
+
+.app-body--workspace .mp-toolbar__submit {
+    border-radius: 10px;
+    background: var(--mockup-orange) !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 0.45rem 1rem !important;
+    font-weight: 800;
+    font-size: 0.82rem;
+}
+
+.app-body--workspace .mp-toolbar__filters {
+    margin-top: 0.65rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid #e8edf2;
+    gap: 0.5rem;
+}
+
+.app-body--workspace .mp-section__head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.85rem;
+}
+
+.app-body--workspace .mp-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 800;
+}
+
+.app-body--workspace .mp-pill--supply {
+    background: transparent;
+    color: var(--mockup-orange);
+    border: none;
+    padding: 0;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.app-body--workspace .mp-section__count {
+    font-size: 0.82rem;
+    color: #5c6f82;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.app-body--workspace .mp-grid {
+    grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+    gap: 1rem;
+}
+
+.app-body--workspace .mp-card {
+    border-radius: var(--mockup-card-radius) !important;
+    overflow: hidden;
+    border: 0.5px solid #c5d0db !important;
+}
+
+.app-body--workspace .mp-card__media-wrap {
+    aspect-ratio: 4 / 3;
+}
+
+.app-body--workspace .mp-card__badge--cat {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.28rem 0.5rem;
+    border-radius: 6px;
+}
+
+.app-body--workspace .mp-card__badge--status {
+    background: var(--mockup-orange);
+    color: #fff;
+    border: none;
+    font-size: 0.62rem;
+    font-weight: 800;
+    padding: 0.28rem 0.5rem;
+    border-radius: 6px;
+}
+
+.app-body--workspace .mp-card__price-tag {
+    background: var(--mockup-navy);
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    padding: 0.35rem 0.6rem;
+}
+
+.app-body--workspace .mp-card__body {
+    padding: 0.85rem 0.95rem 0.95rem;
+    gap: 0.4rem;
+}
+
+.app-body--workspace .mp-card__meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.15rem;
+}
+
+.app-body--workspace .mp-card__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--mockup-navy);
+}
+
+.app-body--workspace .mp-card__rating svg {
+    color: var(--mockup-navy);
+}
+
+.app-body--workspace .mp-stock {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+
+.app-body--workspace .mp-stock--ok {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.app-body--workspace .mp-stock--low {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.app-body--workspace .mp-stock--order {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.app-body--workspace .mp-card__footer {
+    border-top: 1px solid #e8edf2;
+    margin-top: 0.35rem;
+    padding-top: 0.55rem;
+    font-size: 0.75rem;
+}
+
+.app-body--workspace .mp-card__views::before {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 0.2rem;
+    vertical-align: -2px;
+    background: currentColor;
+    opacity: 0.5;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") center/contain no-repeat;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Cpath d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* —— Accueil hero + KPI —— */
+.app-body--workspace .app-home-hero {
+    border-radius: var(--mockup-card-radius);
+    padding: 1.2rem 1.35rem;
+}
+
+.app-body--workspace .app-home-hero__progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 10rem;
+}
+
+.app-body--workspace .app-home-hero__progress-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.app-body--workspace .app-home-hero__progress-bar {
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+.app-body--workspace .app-home-hero__progress-fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: #60a5fa;
+}
+
+.app-body--workspace .app-kpi-grid--home:not(.app-home-carousel) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.85rem;
+}
+
+@media (max-width: 900px) {
+    .app-body--workspace .app-kpi-grid--home:not(.app-home-carousel) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.app-body--workspace .app-kpi-grid--home.app-home-carousel,
+.app-body--workspace .app-home-shortcuts__grid.app-home-carousel,
+.app-body--workspace .app-supplier-home-grid.app-home-carousel {
+    display: flex !important;
+    grid-template-columns: none !important;
+}
+
+.app-body--workspace .app-home-carousel .app-kpi-card--home {
+    display: flex !important;
+    flex-direction: column;
+    visibility: visible;
+    opacity: 1;
+}
+
+.app-body--workspace .app-kpi-card--home {
+    border-radius: var(--mockup-card-radius);
+    border: 0.5px solid #c5d0db;
+    padding: 1rem;
+    background: rgba(241, 155, 52, 0.05);
+}
+
+.app-body--workspace .app-home-search {
+    border-radius: var(--mockup-card-radius);
+}
+
+.app-body--workspace .app-home-shortcut {
+    border-radius: 12px !important;
+    border: 0.5px solid #c5d0db !important;
+    background: rgba(241, 155, 52, 0.06);
+}
+
+.app-body--workspace .app-home-shortcut.is-active {
+    background: rgba(241, 155, 52, 0.12) !important;
+    border: 0.5px solid rgba(241, 155, 52, 0.55) !important;
+    box-shadow: inset 0 -2px 0 var(--mockup-orange);
+}
+
+.app-body--workspace .app-supplier-home-tile__price {
+    padding: 0 0.75rem 0.75rem;
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--mockup-orange);
+}
+
+.app-body--workspace .app-supplier-home-tile__price-tag {
+    display: none;
+}
+
+/* —— Détail commande (2 colonnes) —— */
+.app-body--workspace .order-layout {
+    display: grid;
+    grid-template-columns: minmax(17rem, 22rem) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+@media (max-width: 960px) {
+    .app-body--workspace .order-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.app-body--workspace .order-card {
+    background: #fff;
+    border: 0.5px solid #c5d0db;
+    border-radius: var(--mockup-card-radius);
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.85rem;
+}
+
+.app-body--workspace .order-card__title {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--mockup-navy);
+}
+
+.app-body--workspace .order-status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    background: rgba(241, 155, 52, 0.14);
+    color: var(--mockup-orange);
+    font-size: 0.78rem;
+    font-weight: 800;
+}
+
+.app-body--workspace .order-client-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid #e8edf2;
+}
+
+.app-body--workspace .order-client-mini__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e8edf2;
+    color: var(--mockup-navy);
+    font-weight: 800;
+    font-size: 0.82rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.app-body--workspace .order-client-mini__name {
+    font-weight: 800;
+    font-size: 0.92rem;
+    color: var(--mockup-navy);
+}
+
+.app-body--workspace .order-client-mini__role {
+    font-size: 0.78rem;
+    color: #5c6f82;
+}
+
+.app-body--workspace .order-finance__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    font-size: 0.88rem;
+    color: #5c6f82;
+}
+
+.app-body--workspace .order-finance__row--total {
+    margin-top: 0.35rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid #e8edf2;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--mockup-navy);
+}
+
+.app-body--workspace .order-finance__row--total dd,
+.app-body--workspace .order-finance__row--total .order-finance__val {
+    color: var(--mockup-orange);
+    font-size: 1.1rem;
+}
+
+.app-body--workspace .order-finance__val {
+    font-weight: 700;
+    color: var(--mockup-navy);
+    text-align: right;
+}
+
+.app-body--workspace .order-btn-send {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    width: 100%;
+    margin-top: 0.85rem;
+    padding: 0.7rem 1rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--mockup-orange);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.app-body--workspace .order-btn-send:hover {
+    background: var(--mockup-orange-dark);
+    color: #fff;
+}
+
+.app-body--workspace .order-info-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.app-body--workspace .order-info-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid #e8edf2;
+    font-size: 0.88rem;
+}
+
+.app-body--workspace .order-info-list li:last-child {
+    border-bottom: none;
+}
+
+.app-body--workspace .order-info-list span:first-child {
+    color: #5c6f82;
+    font-weight: 600;
+}
+
+.app-body--workspace .order-info-list strong {
+    color: var(--mockup-navy);
+    font-weight: 700;
+    text-align: right;
+}
+
+.app-body--workspace .order-card__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.app-body--workspace .order-card__head-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 8px;
+    background: rgba(241, 155, 52, 0.14);
+    color: var(--mockup-orange);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.app-body--workspace .devis-quote-form {
+    border-radius: var(--mockup-card-radius);
+    padding: 1rem 1.1rem;
+}
+
+.app-body--workspace .devis-quote-lines__head {
+    display: grid;
+    grid-template-columns: 1fr 4.5rem 7rem 2rem;
+    gap: 0.5rem;
+    padding: 0 0.5rem 0.35rem;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+
+.app-body--workspace .devis-quote-lines__row {
+    display: grid;
+    grid-template-columns: 1fr 4.5rem 7rem 2rem;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.5rem;
+    margin-bottom: 0.45rem;
+    background: #f4f6f8;
+    border-radius: 10px;
+    border: 1px solid #e8edf2;
+}
+
+.app-body--workspace .devis-quote-lines__row .app-input {
+    background: #fff;
+    border: 1px solid #d8e0e8;
+    padding: 0.42rem 0.55rem;
+    font-size: 0.88rem;
+    min-height: 2rem;
+}
+
+.app-body--workspace .devis-quote-lines__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.app-body--workspace .devis-quote-line-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #d8e0e8;
+    border-radius: 8px;
+    background: #fff;
+    color: #94a3b8;
+    font-size: 1.35rem;
+    line-height: 1;
+    font-weight: 400;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.app-body--workspace .devis-quote-line-remove:hover:not(:disabled) {
+    color: #dc2626;
+    border-color: #fca5a5;
+    background: #fef2f2;
+}
+
+.app-body--workspace .devis-quote-line-remove:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.app-body--workspace .devis-quote-lines__add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.55rem 0.65rem;
+    border: 1px dashed #d8e0e8;
+    border-radius: 10px;
+    color: #5c6f82;
+    font-size: 0.88rem;
+    font-weight: 600;
+    background: transparent;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.app-body--workspace .devis-quote-lines__add:hover {
+    border-color: var(--mockup-orange);
+    color: var(--mockup-navy);
+    background: rgba(241, 155, 52, 0.06);
+}
+
+.app-body--workspace .devis-quote-lines__add-icon {
+    color: var(--mockup-orange);
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+.app-body--workspace .devis-quote-draft-btn {
+    width: 100%;
+}
+
+@media (max-width: 767px) {
+    .app-body--workspace .devis-quote-lines__head {
+        display: none;
+    }
+
+    .app-body--workspace .devis-quote-lines__row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════
+   Pages restantes — particulier · artisan · BTP · fournisseur
+   ══════════════════════════════════════════════════════════ */
+
+.app-body--workspace .app-mockup-page {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+}
+
+.app-body--workspace .app-page-stack--split {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.app-body--workspace .app-mockup-page > .app-mt,
+.app-body--workspace .app-mockup-page > .app-mt-md,
+.app-body--workspace .app-mockup-page > .app-mt-sm {
+    margin-top: 0 !important;
+}
+
+/* Cartes globales */
+.app-body--workspace .app-mockup-page .app-card,
+.app-body--workspace .app-mockup-page .order-card,
+.app-body--workspace .app-mockup-page .devis-card,
+.app-body--workspace .app-mockup-page .app-kpi-card,
+.app-body--workspace .app-mockup-page .app-settings-card,
+.app-body--workspace .app-mockup-page .app-notif-card,
+.app-body--workspace .app-mockup-page .app-filter-bar,
+.app-body--workspace .app-mockup-page .app-manage-toolbar,
+.app-body--workspace .app-mockup-page .app-home-shortcuts,
+.app-body--workspace .app-mockup-page .app-home-search,
+.app-body--workspace .app-mockup-page .app-home-kpi {
+    border-radius: var(--mockup-card-radius) !important;
+    border: 0.5px solid #c5d0db !important;
+    background: #fff;
+    box-shadow: none !important;
+}
+
+.app-body--workspace .app-mockup-page .app-home-shortcut {
+    border: 0.5px solid #c5d0db !important;
+}
+
+.app-body--workspace .app-mockup-page .app-section-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--mockup-navy);
+    letter-spacing: -0.02em;
+}
+
+/* Boutons */
+.app-body--workspace .app-mockup-page .app-btn--inline,
+.app-body--workspace .app-mockup-page .app-btn:not(.app-btn--secondary):not(.app-btn--ghost):not(.app-btn--ghost-dark) {
+    background: var(--mockup-orange) !important;
+    border-color: var(--mockup-orange) !important;
+    color: #fff !important;
+    border-radius: 10px;
+    font-weight: 800;
+}
+
+.app-body--workspace .app-mockup-page .app-btn--inline:hover,
+.app-body--workspace .app-mockup-page .app-btn:not(.app-btn--secondary):not(.app-btn--ghost):hover {
+    background: var(--mockup-orange-dark) !important;
+    border-color: var(--mockup-orange-dark) !important;
+}
+
+.app-body--workspace .app-mockup-page .app-btn--secondary {
+    background: #fff !important;
+    border: 1px solid #d8e0e8 !important;
+    color: var(--mockup-navy) !important;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.app-body--workspace .app-mockup-page .app-btn--ghost {
+    border-radius: 10px;
+}
+
+/* Barre d’actions gestion (catalogue, services, besoins…) */
+.app-body--workspace .app-mockup-page .app-manage-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    border-radius: var(--mockup-card-radius);
+}
+
+.app-body--workspace .app-mockup-page .app-manage-toolbar .app-btn--inline {
+    order: -1;
+}
+
+/* Onglets devis / candidatures (pill orange) */
+.app-body--workspace .devis-tabs--pill,
+.app-body--workspace .app-mockup-page .mp-tabs.devis-tabs--pill {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    gap: 0.25rem;
+    padding: 0.3rem;
+    margin: 0.75rem 0 0;
+    width: auto;
+    max-width: 100%;
+    background: #fff;
+    border: 1px solid #d8e0e8;
+    border-radius: 999px;
+}
+
+.app-body--workspace .devis-tabs--pill .mp-tab,
+.app-body--workspace .app-mockup-page .mp-tabs.devis-tabs--pill .mp-tab {
+    flex: 0 1 auto;
+    min-width: 6rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: none;
+    border-bottom: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--mockup-navy);
+    background: transparent;
+    margin-bottom: 0;
+}
+
+.app-body--workspace .devis-tabs--pill .mp-tab.is-active,
+.app-body--workspace .app-mockup-page .mp-tabs.devis-tabs--pill .mp-tab.is-active {
+    background: var(--mockup-orange);
+    color: #fff;
+    font-weight: 800;
+}
+
+/* Filtres chips */
+.app-body--workspace .app-mockup-page .devis-chip,
+.app-body--workspace .app-mockup-page .app-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.38rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid #d8e0e8;
+    background: #fff;
+    color: var(--mockup-navy);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    min-height: auto;
+}
+
+.app-body--workspace .app-mockup-page .devis-chip.is-active,
+.app-body--workspace .app-mockup-page .app-chip.is-active {
+    background: rgba(241, 155, 52, 0.12);
+    border-color: var(--mockup-orange);
+    color: var(--mockup-navy);
+}
+
+.app-body--workspace .app-mockup-page .devis-chips__row,
+.app-body--workspace .app-mockup-page .app-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+/* Cartes devis / commandes — une seule vue selon la largeur */
+.app-body--workspace .app-mockup-page .devis-list-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+
+.app-body--workspace .app-mockup-page .devis-list-table {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .app-body--workspace .app-mockup-page .devis-list-cards {
+        display: none !important;
+    }
+
+    .app-body--workspace .app-mockup-page .devis-list-table {
+        display: block;
+    }
+}
+
+.app-body--workspace .app-mockup-page .devis-card {
+    padding: 1rem 1.05rem;
+    margin: 0;
+}
+
+.app-body--workspace .app-mockup-page .devis-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.app-body--workspace .app-mockup-page .devis-card__title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--mockup-navy);
+    margin: 0 0 0.35rem;
+}
+
+.app-body--workspace .app-mockup-page .devis-card__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+    padding-top: 0.65rem;
+    border-top: none;
+}
+
+.app-body--workspace .app-mockup-page .devis-card__foot strong {
+    color: var(--mockup-orange);
+    font-weight: 800;
+}
+
+.app-body--workspace .app-mockup-page .app-pill {
+    display: inline-flex;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(241, 155, 52, 0.14);
+    color: var(--mockup-orange);
+    font-size: 0.75rem;
+    font-weight: 800;
+    border: none;
+}
+
+.app-body--workspace .app-mockup-page .devis-kind {
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.22rem 0.55rem;
+    border-radius: 6px;
+}
+
+/* Tableaux */
+.app-body--workspace .app-mockup-page .app-table-wrap {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e8edf2;
+}
+
+.app-body--workspace .app-mockup-page .app-table {
+    margin: 0;
+}
+
+.app-body--workspace .app-mockup-page .app-table thead th {
+    background: #f4f6f8;
+    color: #5c6f82;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid #e8edf2;
+}
+
+.app-body--workspace .app-mockup-page .app-table tbody td {
+    padding: 0.7rem 0.85rem;
+    font-size: 0.88rem;
+    border-bottom: 1px solid #e8edf2;
+    vertical-align: middle;
+}
+
+.app-body--workspace .app-mockup-page .app-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.app-body--workspace .app-mockup-page .app-table tbody tr:hover td {
+    background: rgba(241, 155, 52, 0.04);
+}
+
+/* Profil */
+.app-body--workspace .app-mockup-page .app-profile-hero {
+    background: var(--mockup-navy);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: var(--mockup-card-radius);
+    padding: 1.25rem;
+}
+
+.app-body--workspace .app-mockup-page .app-profile-hero .app-section-title,
+.app-body--workspace .app-mockup-page .app-profile-hero .app-muted {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.app-body--workspace .app-mockup-page .app-profile-hero .app-section-title {
+    color: #fff;
+}
+
+.app-body--workspace .app-mockup-page .app-profile-dl__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid #e8edf2;
+}
+
+.app-body--workspace .app-mockup-page .app-profile-dl__row dt {
+    color: #5c6f82;
+    font-weight: 600;
+    font-size: 0.88rem;
+}
+
+.app-body--workspace .app-mockup-page .app-profile-dl__row dd {
+    color: var(--mockup-navy);
+    font-weight: 700;
+    text-align: right;
+    margin: 0;
+}
+
+/* Paramètres */
+.app-body--workspace .app-mockup-page .app-settings-hub__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: 0.85rem;
+}
+
+.app-body--workspace .app-mockup-page .app-settings-card {
+    border-radius: var(--mockup-card-radius);
+    border: 1px solid #d8e0e8;
+    padding: 1rem;
+    text-decoration: none;
+    color: var(--mockup-navy);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.app-body--workspace .app-mockup-page .app-settings-card:hover {
+    border-color: var(--mockup-orange);
+    background: rgba(241, 155, 52, 0.05);
+}
+
+.app-body--workspace .app-mockup-page .app-settings-card.is-active {
+    border-color: var(--mockup-orange);
+    background: rgba(241, 155, 52, 0.1);
+}
+
+.app-body--workspace .app-mockup-page .app-settings-card__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: rgba(241, 155, 52, 0.14);
+    color: var(--mockup-orange);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.55rem;
+}
+
+/* Notifications */
+.app-body--workspace .app-mockup-page .app-notif-page-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem;
+}
+
+.app-body--workspace .app-mockup-page .app-notif-page-head__badge {
+    background: var(--mockup-orange);
+    color: #fff;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
+.app-body--workspace .app-mockup-page .app-notif-card {
+    border-radius: 12px;
+    border: 1px solid #e8edf2;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.5rem;
+    background: #fff;
+}
+
+.app-body--workspace .app-mockup-page .app-notif-card.is-unread {
+    border-left: 3px solid var(--mockup-orange);
+    background: rgba(241, 155, 52, 0.04);
+}
+
+/* Messages */
+.app-body--workspace .app-mockup-page .msn {
+    border-radius: var(--mockup-card-radius);
+    border: 1px solid #d8e0e8;
+    overflow: hidden;
+    min-height: 28rem;
+}
+
+.app-body--workspace .app-mockup-page .msn__sidebar {
+    background: #ffffff;
+    border-right: 1px solid #e8edf2;
+}
+
+.app-body--workspace .app-mockup-page .msn__thread.is-active {
+    background: rgba(241, 155, 52, 0.1);
+    border-left: 3px solid var(--mockup-orange);
+}
+
+.app-body--workspace .app-mockup-page .msn__bubble--mine {
+    background: var(--mockup-orange);
+    color: #fff;
+}
+
+.app-body--workspace .app-mockup-page .msn-tickets__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.app-body--workspace .app-mockup-page .msn-ticket-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #e8edf2;
+    text-decoration: none;
+    color: inherit;
+}
+
+.app-body--workspace .app-mockup-page .msn-ticket-row:hover {
+    background: rgba(241, 155, 52, 0.05);
+}
+
+/* Dashboard */
+.app-body--workspace .app-mockup-page .app-kpi-card {
+    border-radius: var(--mockup-card-radius);
+    border: 1px solid #d8e0e8;
+}
+
+.app-body--workspace .app-mockup-page .app-kpi-card::before {
+    display: none;
+}
+
+.app-body--workspace .app-mockup-page .app-chart-card {
+    border-radius: var(--mockup-card-radius);
+    border: 1px solid #d8e0e8;
+    padding: 1rem;
+}
+
+.app-body--workspace .app-mockup-page .app-dashboard-panel {
+    border-radius: var(--mockup-card-radius);
+}
+
+.app-body--workspace .app-mockup-page .app-dashboard-panel__head {
+    background: #f4f6f8 !important;
+    border-bottom: 1px solid #e8edf2;
+}
+
+/* Formulaires */
+.app-body--workspace .app-mockup-page .app-field input,
+.app-body--workspace .app-mockup-page .app-field select,
+.app-body--workspace .app-mockup-page .app-field textarea,
+.app-body--workspace .app-mockup-page .app-input {
+    border: 1px solid #d8e0e8;
+    border-radius: 10px;
+    padding: 0.42rem 0.72rem;
+    font-size: 0.9rem;
+    min-height: 2.05rem;
+    background: #fff;
+}
+
+.app-body--workspace .app-mockup-page .app-field input:focus,
+.app-body--workspace .app-mockup-page .app-field select:focus,
+.app-body--workspace .app-mockup-page .app-field textarea:focus,
+.app-body--workspace .app-mockup-page .app-input:focus {
+    border-color: var(--mockup-orange);
+    outline: none;
+    box-shadow: none;
+}
+
+.app-body--workspace .app-mockup-page .app-field label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #5c6f82;
+}
+
+/* Filtres & alertes */
+.app-body--workspace .app-mockup-page .app-filter-bar,
+.app-body--workspace .app-mockup-page .app-filter-chip {
+    padding: 0.85rem 1rem;
+    border-radius: var(--mockup-card-radius);
+}
+
+.app-body--workspace .app-mockup-page .app-alert {
+    border-radius: 12px;
+}
+
+.app-body--workspace .app-mockup-page .app-alert--error {
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+/* Détail marketplace */
+.app-body--workspace .app-mockup-page .mp-detail {
+    border-radius: var(--mockup-card-radius) !important;
+    overflow: hidden;
+}
+
+.app-body--workspace .app-mockup-page .mp-detail__price {
+    color: var(--mockup-orange);
+    font-weight: 800;
+}
+
+.app-body--workspace .app-mockup-page .mp-detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.85rem;
+}
+
+/* Liens */
+.app-body--workspace .app-mockup-page .app-text-link {
+    color: var(--mockup-orange);
+    font-weight: 700;
+}
+
+.app-body--workspace .app-mockup-page .app-text-link:hover {
+    color: var(--mockup-orange-dark);
+}
+
+/* Tuiles workflow (accueil déjà stylé, rappel global) */
+.app-body--workspace .app-mockup-page .app-workflow-tile {
+    border-radius: 12px !important;
+}
+
+/* Panier fournisseur / bâtiment */
+.app-body--workspace .app-mockup-page .app-cart-line {
+    border-radius: 12px;
+    border: 1px solid #e8edf2;
+    margin-bottom: 0.5rem;
+    padding: 0.75rem;
+}
+
+.app-body--workspace .app-mockup-page .app-cart-supplier__head {
+    background: var(--mockup-navy);
+    color: #fff;
+    border-radius: var(--mockup-card-radius) var(--mockup-card-radius) 0 0;
+}
+

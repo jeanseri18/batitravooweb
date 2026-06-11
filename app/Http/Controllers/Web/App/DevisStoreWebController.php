@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web\App;
 use App\Http\Controllers\Api\Me\DevisController as ApiMeDevisController;
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Web\ManualDevisQuoteBuilder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -53,9 +54,11 @@ class DevisStoreWebController extends Controller
 
         $request->merge($validated);
 
-        $lineItems = $this->buildManualLineItems($request);
-        if ($lineItems !== null) {
-            $request->merge(['line_items' => $lineItems]);
+        if ($user->profile_type !== User::PROFILE_PARTICULIER) {
+            $lineItems = app(ManualDevisQuoteBuilder::class)->buildFromRequest($request);
+            if ($lineItems !== null) {
+                $request->merge(['line_items' => $lineItems]);
+            }
         }
 
         $response = app(ApiMeDevisController::class)->store($request);
@@ -82,72 +85,4 @@ class DevisStoreWebController extends Controller
         return redirect()->route('app.'.$slug.'.devis')->with('status', 'Demande de devis enregistrée.');
     }
 
-    /**
-     * Lignes optionnelles + remise / TVA (alignement éditeur de proposition mobile).
-     *
-     * @return array<string, mixed>|null
-     */
-    private function buildManualLineItems(Request $request): ?array
-    {
-        /** @var array<int, string|null> $labels */
-        $labels = $request->input('line_label', []);
-        /** @var array<int, int|string|null> $qtys */
-        $qtys = $request->input('line_qty', []);
-        /** @var array<int, int|string|null> $units */
-        $units = $request->input('line_unit_fcfa', []);
-
-        if (! is_array($labels)) {
-            return null;
-        }
-
-        $lignes = [];
-        foreach ($labels as $i => $rawLabel) {
-            $label = trim((string) $rawLabel);
-            if ($label === '') {
-                continue;
-            }
-            $qty = max(1, (int) ($qtys[$i] ?? 1));
-            $unit = max(0, (int) ($units[$i] ?? 0));
-            $lineTot = $qty * $unit;
-            $lignes[] = [
-                'label' => $label,
-                'qty' => $qty,
-                'unit_price_fcfa' => $unit,
-                'line_total_fcfa' => $lineTot,
-                'total' => $lineTot,
-            ];
-        }
-
-        if ($lignes === []) {
-            return null;
-        }
-
-        $discountPct = max(0, min(100, (int) $request->input('discount_pct', 0)));
-        $tvaPct = max(0, min(100, (int) $request->input('tva_pct', 0)));
-
-        $subtotal = 0;
-        foreach ($lignes as $row) {
-            $subtotal += (int) ($row['line_total_fcfa'] ?? 0);
-        }
-
-        $discountFcfa = (int) round($subtotal * $discountPct / 100);
-        $afterDiscount = max(0, $subtotal - $discountFcfa);
-        $tvaFcfa = (int) round($afterDiscount * $tvaPct / 100);
-        $totalGeneral = $afterDiscount + $tvaFcfa;
-
-        return [
-            'currency' => 'XOF',
-            'source' => 'manual_quote_web',
-            'discount_pct' => $discountPct,
-            'tva_pct' => $tvaPct,
-            'lignes' => $lignes,
-            'totals' => [
-                'subtotal_fcfa' => $subtotal,
-                'discount_fcfa' => $discountFcfa,
-                'subtotal_after_discount_fcfa' => $afterDiscount,
-                'tva_fcfa' => $tvaFcfa,
-                'total_fcfa' => $totalGeneral,
-            ],
-        ];
-    }
 }

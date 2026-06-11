@@ -32,11 +32,15 @@ use App\Http\Controllers\Web\App\DevisUpdateWebController;
 use App\Http\Controllers\Web\App\FournisseurProductWebController;
 use App\Http\Controllers\Web\App\MarketplaceShowController;
 use App\Http\Controllers\Web\App\MessageSendController;
+use App\Http\Controllers\Web\App\MessageThreadWebController;
 use App\Http\Controllers\Web\App\NotificationReadController;
 use App\Http\Controllers\Web\App\ProfileWebController;
 use App\Http\Controllers\Web\App\ShellController;
 use App\Http\Controllers\Web\App\SupplierCartWebController;
 use App\Http\Controllers\Web\App\SupportTicketActionController;
+use App\Http\Controllers\Web\App\UserDocumentWebController;
+use App\Http\Controllers\Web\AnnuaireController;
+use App\Http\Controllers\Web\ProfileLandingController;
 use App\Http\Controllers\Web\AppHomeController;
 use App\Http\Controllers\Web\AppLogoutController;
 use App\Http\Controllers\Web\Auth\LoginController as WebLoginController;
@@ -48,6 +52,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/annuaire', AnnuaireController::class)->name('vitrine.annuaire');
+Route::get('/particulier', [ProfileLandingController::class, 'particulier'])->name('vitrine.particulier');
+Route::get('/artisan', [ProfileLandingController::class, 'artisan'])->name('vitrine.artisan');
+Route::get('/fournisseur', [ProfileLandingController::class, 'fournisseur'])->name('vitrine.fournisseur');
+Route::get('/entreprise-btp', [ProfileLandingController::class, 'entrepriseBtp'])->name('vitrine.entreprise_btp');
 Route::view('/contact', 'vitrine.contact')->name('vitrine.contact');
 Route::view("/centre-d-aide", 'vitrine.help_center')->name('vitrine.help_center');
 Route::view('/faq', 'vitrine.faq')->name('vitrine.faq');
@@ -71,7 +80,9 @@ Route::prefix('app')->middleware(['auth', 'not_admin', 'api.active'])->group(fun
             Route::get('/', [ShellController::class, 'home'])->name('home');
             Route::get('/dashboard', [ShellController::class, 'dashboard'])->name('dashboard');
             Route::get('/messages', [ShellController::class, 'messages'])->name('messages');
+            Route::get('/messages/fil', MessageThreadWebController::class)->name('messages.thread');
             Route::post('/messages/envoyer', MessageSendController::class)->name('messages.send');
+            Route::get('/parametres', [ShellController::class, 'settings'])->name('settings');
             Route::get('/profil', [ShellController::class, 'profile'])->name('profile');
             Route::get('/profil/mot-de-passe', [ShellController::class, 'profilePassword'])->name('profile.password.page');
             Route::get('/profil/localisation', [ShellController::class, 'profileLocation'])->name('profile.location.page');
@@ -118,6 +129,9 @@ Route::prefix('app')->middleware(['auth', 'not_admin', 'api.active'])->group(fun
                 Route::post('/panier/vider', [SupplierCartWebController::class, 'clear'])->name('cart.clear');
                 Route::post('/panier/commander', [SupplierCartWebController::class, 'checkout'])->name('cart.checkout');
             }
+            if ($slug === 'fournisseur') {
+                Route::get('/commandes', [ShellController::class, 'fournisseurOrders'])->name('commandes');
+            }
             Route::get('/devis', [ShellController::class, 'devis'])->name('devis');
             Route::get('/devis/nouveau', [ShellController::class, 'devisCreate'])->name('devis.create');
             Route::post('/devis', DevisStoreWebController::class)->name('devis.store');
@@ -131,6 +145,10 @@ Route::prefix('app')->middleware(['auth', 'not_admin', 'api.active'])->group(fun
             Route::get('/notifications', [ShellController::class, 'notificationsPage'])->name('notifications');
             Route::post('/notifications/lues', NotificationReadController::class)->name('notifications.read_all');
 
+            if (in_array($slug, ['artisan', 'batiment', 'fournisseur'], true)) {
+                Route::post('/documents', [UserDocumentWebController::class, 'store'])->name('documents.store');
+                Route::delete('/documents/{document}', [UserDocumentWebController::class, 'destroy'])->name('documents.destroy')->whereNumber('document');
+            }
             if ($slug === 'fournisseur') {
                 Route::get('/mes-produits/nouveau', [FournisseurProductWebController::class, 'create'])->name('products.create');
                 Route::post('/mes-produits', [FournisseurProductWebController::class, 'store'])->name('products.store');

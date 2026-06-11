@@ -1,23 +1,18 @@
-@php
-    $u = $profileData['user'] ?? [];
-    $displayName = trim((string) ($u['name'] ?? '')) !== '' ? trim((string) $u['name']) : 'Membre';
-@endphp
+@include('app.shell.partials.home_hero', [
+    'heroCtaLabel' => 'Demander un devis',
+    'heroCtaUrl' => route('app.particulier.devis.create'),
+])
 
-<div class="app-card app-card--flush app-fournisseur-home-head">
-    <div class="app-fournisseur-home-head__row">
-        <div class="app-fournisseur-home-head__greet app-fournisseur-home-head__greet--grow">
-            <span class="app-muted app-fournisseur-home-head__hi">Bonjour,</span>
-            <strong class="app-fournisseur-home-head__name">{{ $displayName }}</strong>
-        </div>
-    </div>
-</div>
+@if (! empty($dashboard['kpis']))
+    @include('app.shell.partials.dashboard_metrics')
+@endif
 
-<form method="get" action="{{ route('app.particulier.marketplace') }}" class="app-card app-mt">
-    <label for="particulier-home-search" class="app-muted app-text-sm">Rechercher sur le marketplace</label>
-    <div class="app-mt-sm" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-        <input type="search" name="q" id="particulier-home-search" class="app-input app-input--rounded" style="flex:1;min-width:12rem;" placeholder="Mots-clés, ville, matériaux…" value="{{ request('q') }}">
-        <button type="submit" class="app-btn app-btn--inline app-btn--sm">Rechercher</button>
-    </div>
-</form>
+@include('app.shell.partials.home_search', [
+    'searchAction' => route('app.particulier.marketplace'),
+    'searchLabel' => 'Rechercher sur le marketplace',
+    'searchPlaceholder' => 'Mots-clés, ville, matériaux…',
+    'searchId' => 'particulier-home-search',
+    'searchHiddenFields' => ['tab' => 'services'],
+])
 
 @include('app.shell.partials.home_shortcuts')

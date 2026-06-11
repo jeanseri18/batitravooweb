@@ -20,23 +20,26 @@ class ParticulierDashboardController extends Controller
         abort_unless($u->profile_type === User::PROFILE_PARTICULIER, 403);
 
         $period = $request->query('period', 'month');
-        if (! in_array($period, ['month', 'year'], true)) {
+        if (! in_array($period, ['week', 'month', 'year'], true)) {
             $period = 'month';
         }
 
         $now = Carbon::now();
 
-        $rangeStart = $period === 'year'
-            ? $now->copy()->startOfYear()
-            : $now->copy()->startOfMonth();
+        if ($period === 'year') {
+            $rangeStart = $now->copy()->startOfYear();
+            $prevAnchor = $now->copy()->subYear();
+            $prevRangeStart = $prevAnchor->copy()->startOfYear();
+        } elseif ($period === 'week') {
+            $rangeStart = $now->copy()->startOfWeek();
+            $prevAnchor = $now->copy()->subWeek();
+            $prevRangeStart = $prevAnchor->copy()->startOfWeek();
+        } else {
+            $rangeStart = $now->copy()->startOfMonth();
+            $prevAnchor = $now->copy()->subMonth();
+            $prevRangeStart = $prevAnchor->copy()->startOfMonth();
+        }
         $rangeEnd = $now->copy()->endOfDay();
-
-        $prevAnchor = $period === 'year'
-            ? $now->copy()->subYear()
-            : $now->copy()->subMonth();
-        $prevRangeStart = $period === 'year'
-            ? $prevAnchor->copy()->startOfYear()
-            : $prevAnchor->copy()->startOfMonth();
         $prevRangeEnd = $prevAnchor->copy()->endOfDay();
 
         $cid = $u->id;

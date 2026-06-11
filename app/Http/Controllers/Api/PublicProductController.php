@@ -31,7 +31,11 @@ class PublicProductController extends Controller
         if ($search !== '') {
             $q->where(function ($b) use ($search) {
                 $b->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('user', function ($u) use ($search) {
+                        $u->where('company_name', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%");
+                    });
             });
         }
         if ($request->filled('category_id')) {
@@ -87,18 +91,28 @@ class PublicProductController extends Controller
             'price_amount' => (int) $p->price_amount,
             'price_display_fr' => number_format((int) $p->price_amount, 0, ',', ' ').' FCFA',
             'stock_units' => (int) $p->stock_units,
+            'unit_of_measure' => $p->unit_of_measure ?: Product::UNIT_PIECE,
+            'unit_of_measure_label' => $p->unitLabel(),
+            'stock_display_fr' => $p->stockShortLabel(),
             'views_count' => (int) $p->views_count,
             'user_id' => $p->user_id,
             'category_id' => $p->category_id,
         ];
 
         if ($p->relationLoaded('user') && $p->user) {
+            $owner = $p->user;
+            $description = trim((string) ($owner->company_description ?? ''));
+            if ($description === '') {
+                $description = trim((string) ($owner->bio ?? ''));
+            }
             $base['owner'] = [
-                'id' => $p->user->id,
-                'name' => $p->user->name,
-                'profile_type' => $p->user->profile_type,
-                'company_name' => $p->user->company_name,
-                'company_address' => $p->user->company_address,
+                'id' => $owner->id,
+                'name' => $owner->name,
+                'profile_type' => $owner->profile_type,
+                'company_name' => $owner->company_name,
+                'company_address' => $owner->company_address,
+                'activity_type' => $owner->activity_type,
+                'description' => $description !== '' ? $description : null,
             ];
         }
         if ($p->relationLoaded('category') && $p->category) {

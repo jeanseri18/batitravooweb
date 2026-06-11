@@ -18,7 +18,7 @@ class ArtisanDashboardController extends Controller
         abort_unless($u->profile_type === User::PROFILE_ARTISAN, 403);
 
         $period = $request->query('period', 'month');
-        if (! in_array($period, ['month', 'year'], true)) {
+        if (! in_array($period, ['week', 'month', 'year'], true)) {
             $period = 'month';
         }
 
@@ -28,6 +28,8 @@ class ArtisanDashboardController extends Controller
 
         if ($period === 'year') {
             $rangeStart = $now->copy()->startOfYear();
+        } elseif ($period === 'week') {
+            $rangeStart = $now->copy()->startOfWeek();
         } else {
             $rangeStart = $now->copy()->startOfMonth();
         }
@@ -59,6 +61,9 @@ class ArtisanDashboardController extends Controller
         if ($period === 'year') {
             [$xLabels, $revenuParPeriodeK, $envoyeesParPeriode, $accepteParPeriode] =
                 $this->buildYearlySeries($applicantId, $now, $end);
+        } elseif ($period === 'week') {
+            [$xLabels, $revenuParPeriodeK, $envoyeesParPeriode, $accepteParPeriode] =
+                $this->buildWeeklySeries($applicantId, $rangeStart, $end);
         } else {
             [$xLabels, $revenuParPeriodeK, $envoyeesParPeriode, $accepteParPeriode] =
                 $this->buildMonthlyLast7DaysSeries($applicantId, $rangeStart, $end, $now);
@@ -69,7 +74,7 @@ class ArtisanDashboardController extends Controller
             'chart_main_title' => 'Revenus et candidatures',
             'kpi_labels' => [
                 'revenue_fcfa' => 'Chiffre d’affaires (FCFA)',
-                'missions_recues' => 'Missions reçues',
+                'missions_recues' => 'Mes missions',
                 'candidatures_envoyees' => 'Candidatures envoyées',
                 'opportunites_ouvertes' => 'Opportunités ouvertes',
             ],
@@ -81,6 +86,11 @@ class ArtisanDashboardController extends Controller
             ],
             'charts' => [
                 'granularity' => $period === 'year' ? 'month' : 'day',
+                'period_label' => match ($period) {
+                    'week' => 'Cette semaine',
+                    'year' => 'Cette année',
+                    default => 'Ce mois-ci',
+                },
                 'x_labels' => $xLabels,
                 'revenu_par_jour_k' => $revenuParPeriodeK,
                 'candidatures_envoyees_par_jour' => $envoyeesParPeriode,
@@ -92,6 +102,59 @@ class ArtisanDashboardController extends Controller
                 ],
             ],
         ]);
+    }
+
+    /**
+     * 7 jours de la semaine en cours (lun → dim).
+     *
+     * @return array{0: array<int, string>, 1: array<int, float>, 2: array<int, int>, 3: array<int, int>}
+     */
+    private function buildWeeklySeries(
+        int $applicantId,
+        Carbon $weekStart,
+        Carbon $end
+    ): array {
+        $xLabels = [];
+        $revenuParJourK = [];
+        $envoyeesParJour = [];
+        $accepteParJour = [];
+
+        for ($i = 0; $i < 7; $i++) {
+            $day = $weekStart->copy()->addDays($i);
+            $ds = $day->toDateString();
+            $xLabels[] = $this->shortWeekdayFr($day);
+
+            if ($day->gt($end)) {
+                $revenuParJourK[] = 0.0;
+                $envoyeesParJour[] = 0;
+                $accepteParJour[] = 0;
+
+                continue;
+            }
+
+            $envoyeesParJour[] = (int) Candidature::query()
+                ->where('applicant_id', $applicantId)
+                ->whereDate('created_at', $ds)
+                ->count();
+
+            $accepteParJour[] = (int) Candidature::query()
+                ->where('applicant_id', $applicantId)
+                ->where('status', 'accepte')
+                ->whereDate('updated_at', $ds)
+                ->count();
+
+            $revenueJour = (int) Candidature::query()
+                ->where('applicant_id', $applicantId)
+                ->where('status', 'accepte')
+                ->whereDate('updated_at', $ds)
+                ->with('besoin')
+                ->get()
+                ->sum(fn (Candidature $c) => $this->parseBudgetToFcfa($c->besoin?->budget));
+
+            $revenuParJourK[] = round($revenueJour / 1000, 1);
+        }
+
+        return [$xLabels, $revenuParJourK, $envoyeesParJour, $accepteParJour];
     }
 
     /**

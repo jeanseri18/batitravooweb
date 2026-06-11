@@ -21,7 +21,7 @@
 @endphp
 
 @if ($showTabs)
-    <nav class="mp-tabs app-card app-mt" aria-label="Type de candidatures">
+    <nav class="mp-tabs devis-tabs--pill app-card app-mt" aria-label="Type de candidatures">
         <a href="{{ $linkRecues }}" class="mp-tab {{ $vue === 'recues' ? 'is-active' : '' }}" @if ($vue === 'recues') aria-current="page" @endif>Reçues sur mes besoins</a>
         <a href="{{ $linkEnvoyees }}" class="mp-tab {{ $vue === 'envoyees' ? 'is-active' : '' }}" @if ($vue === 'envoyees') aria-current="page" @endif>Mes candidatures envoyées</a>
     </nav>
@@ -90,23 +90,20 @@
                                 <td><span class="app-pill">{{ $statusCand($st) }}</span></td>
                                 <td class="app-muted">{{ $posted }}</td>
                                 <td class="app-table__col-actions">
-                                    <div class="app-cand-actions">
-                                        @if ($peer > 0)
-                                            <a href="{{ route('app.'.$mp.'.messages', ['peer_id' => $peer]) }}" class="app-text-link">Message</a>
-                                        @endif
-                                        @if ($canDecideRecues && $st === 'recu' && $cid > 0)
-                                            <form method="post" action="{{ route('app.'.$mp.'.candidatures.status', ['candidature' => $cid]) }}" class="app-inline-form">
-                                                @csrf
-                                                <input type="hidden" name="status" value="accepte">
-                                                <button type="submit" class="app-btn app-btn--sm app-btn--inline">Accepter</button>
-                                            </form>
-                                            <form method="post" action="{{ route('app.'.$mp.'.candidatures.status', ['candidature' => $cid]) }}" class="app-inline-form">
-                                                @csrf
-                                                <input type="hidden" name="status" value="rejete">
-                                                <button type="submit" class="app-btn app-btn--sm app-btn--secondary">Refuser</button>
-                                            </form>
-                                        @endif
-                                    </div>
+                                    @php
+                                        $candActions = [];
+                                        if ($peer > 0) {
+                                            $candActions[] = ['type' => 'link', 'label' => 'Message', 'href' => route('app.'.$mp.'.messages', ['peer_id' => $peer])];
+                                        }
+                                        if ($canDecideRecues && $st === 'recu' && $cid > 0) {
+                                            $candActions[] = ['type' => 'form', 'label' => 'Accepter', 'action' => route('app.'.$mp.'.candidatures.status', ['candidature' => $cid]), 'hidden' => ['status' => 'accepte']];
+                                            $candActions[] = ['type' => 'form', 'label' => 'Refuser', 'action' => route('app.'.$mp.'.candidatures.status', ['candidature' => $cid]), 'hidden' => ['status' => 'rejete'], 'danger' => true];
+                                        }
+                                    @endphp
+                                    @include('app.shell.partials.table_actions_dropdown', [
+                                        'menuId' => 'cand-recues-'.$cid,
+                                        'actions' => $candActions,
+                                    ])
                                 </td>
                             </tr>
                         @else
@@ -117,7 +114,14 @@
                                 <td class="app-muted">{{ $posted }}</td>
                                 <td class="app-table__col-actions">
                                     @if (! empty($row['besoin_id']))
-                                        <a href="{{ route('app.'.$mp.'.marketplace.besoin', ['besoin' => (int) $row['besoin_id']]) }}" class="app-text-link">Voir le besoin</a>
+                                        @include('app.shell.partials.table_actions_dropdown', [
+                                            'menuId' => 'cand-envoyees-'.(int) $row['besoin_id'].'-'.$loop->index,
+                                            'actions' => [
+                                                ['type' => 'link', 'label' => 'Voir le besoin', 'href' => route('app.'.$mp.'.marketplace.besoin', ['besoin' => (int) $row['besoin_id']])],
+                                            ],
+                                        ])
+                                    @else
+                                        <span class="app-muted">—</span>
                                     @endif
                                 </td>
                             </tr>

@@ -81,91 +81,6 @@
     };
 @endphp
 
-<form method="get" action="{{ $baseMarketplaceUrl }}" class="mp-toolbar app-card">
-    <div class="mp-toolbar__search">
-        <label class="mp-visually-hidden" for="mq">Rechercher une annonce</label>
-        <span class="mp-toolbar__search-icon" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-        </span>
-        <input type="search" name="q" id="mq" value="{{ request('q') }}" placeholder="Recherche" class="mp-toolbar__input" autocomplete="off">
-        <input type="hidden" name="tab" value="{{ $mpTab }}">
-        <button type="submit" class="mp-toolbar__submit app-btn app-btn--inline">Rechercher</button>
-    </div>
-    <div class="mp-toolbar__filters">
-        <div class="app-field app-field--inline mp-toolbar__field">
-            <label for="mcat">Catégorie</label>
-            <select name="category_id" id="mcat" class="mp-select">
-                <option value="">Toutes</option>
-                @if (! empty($marketplaceData['categories']))
-                    @foreach ($marketplaceData['categories'] as $c)
-                        <option value="{{ $c['id'] ?? '' }}" @selected((string) request('category_id') === (string) ($c['id'] ?? ''))>
-                            {{ $c['name'] ?? '—' }}
-                        </option>
-                    @endforeach
-                @endif
-            </select>
-        </div>
-        @if ($mpTab === 'services')
-            <div class="app-field app-field--inline mp-toolbar__field">
-                <label for="msk">Type</label>
-                <select name="service_kind" id="msk" class="mp-select">
-                    <option value="">Tous</option>
-                    <option value="artisan" @selected(request('service_kind') === 'artisan')>Artisans</option>
-                    <option value="entrepreneur" @selected(request('service_kind') === 'entrepreneur')>Entreprise bâtiment</option>
-                </select>
-            </div>
-        @endif
-        @if ($mpTab === 'besoins')
-            <div class="app-field app-field--inline mp-toolbar__field">
-                <label for="mowner">{{ ($profileSlug ?? '') === 'artisan' ? 'Type de client' : 'Auteur' }}</label>
-                <select name="owner" id="mowner" class="mp-select">
-                    <option value="">Tous</option>
-                    <option value="particulier" @selected(request('owner') === 'particulier')>Particuliers</option>
-                    @if (($profileSlug ?? '') === 'artisan')
-                        <option value="pro" @selected(in_array(request('owner'), ['pro', 'entrepreneur_batiment'], true))>Professionnels (BTP)</option>
-                    @else
-                        <option value="entrepreneur_batiment" @selected(request('owner') === 'entrepreneur_batiment')>Entreprise bâtiment</option>
-                    @endif
-                </select>
-            </div>
-        @endif
-        @if ($mpTab === 'produits')
-            <div class="app-field app-field--inline mp-toolbar__field">
-                <label for="mcatscope">Rayon</label>
-                <select name="cat_scope" id="mcatscope" class="mp-select">
-                    <option value="">Tous</option>
-                    <option value="product" @selected(request('cat_scope') === 'product')>Produits</option>
-                    <option value="service" @selected(request('cat_scope') === 'service')>Services</option>
-                    <option value="both" @selected(request('cat_scope') === 'both')>Mixtes</option>
-                </select>
-            </div>
-            <div class="app-field app-field--inline mp-toolbar__field">
-                <label for="muid">N° vendeur</label>
-                <input type="number" name="user_id" id="muid" class="mp-select" style="min-width:7rem;" min="1" step="1" value="{{ old('user_id', request('user_id')) }}" placeholder="—">
-            </div>
-        @endif
-        <div class="app-field app-field--inline mp-toolbar__field">
-            <label for="mpp">Par page</label>
-            <select name="per_page" id="mpp" class="mp-select">
-                @foreach ([12, 24, 48] as $pp)
-                    <option value="{{ $pp }}" @selected((int) request('per_page', 12) === $pp)>{{ $pp }}</option>
-                @endforeach
-            </select>
-        </div>
-        @php
-            $hasMpFilters = filled(request('q'))
-                || filled(request('category_id'))
-                || ($mpTab === 'services' && filled(request('service_kind')))
-                || ($mpTab === 'besoins' && filled(request('owner')))
-                || ($mpTab === 'produits' && (filled(request('user_id')) || filled(request('cat_scope'))))
-                || (int) request('per_page', 12) !== 12;
-        @endphp
-        @if ($hasMpFilters)
-            <a href="{{ $baseMarketplaceUrl }}?{{ http_build_query(['tab' => $mpTab]) }}" class="mp-toolbar__reset app-text-link">Réinitialiser</a>
-        @endif
-    </div>
-</form>
-
 @if (! empty($marketplaceData))
     @php
         $categories = $marketplaceData['categories'] ?? [];
@@ -184,27 +99,164 @@
         $dqProducts = http_build_query(array_merge($detailQueryBase, ['tab' => 'produits']));
         $dqServices = http_build_query(array_merge($detailQueryBase, ['tab' => 'services']));
         $dqBesoins = http_build_query(array_merge($detailQueryBase, ['tab' => 'besoins']));
+        $productsTotal = (int) ($marketplaceData['products']['meta']['total'] ?? count($products));
+        $servicesTotal = (int) ($marketplaceData['services']['meta']['total'] ?? count($services));
+        $besoinsTotal = (int) ($marketplaceData['besoins']['meta']['total'] ?? count($besoins));
     @endphp
 
-    <nav class="mp-tabs app-card app-mt" aria-label="Vue par type d’annonce">
-        @if ($showBesoinsTab)
-            <a href="{{ $mkQuery(['tab' => 'besoins']) }}" class="mp-tab {{ $mpTab === 'besoins' ? 'is-active' : '' }}" @if ($mpTab === 'besoins') aria-current="page" @endif>Opportunités</a>
-        @endif
-        @if ($showServicesTab)
-            <a href="{{ $mkQuery(['tab' => 'services']) }}" class="mp-tab {{ $mpTab === 'services' ? 'is-active' : '' }}" @if ($mpTab === 'services') aria-current="page" @endif>Services</a>
-        @endif
-        <a href="{{ $mkQuery(['tab' => 'produits']) }}" class="mp-tab {{ $mpTab === 'produits' ? 'is-active' : '' }}" @if ($mpTab === 'produits') aria-current="page" @endif>{{ ($profileSlug ?? '') === 'artisan' ? 'Catalogue' : 'Produits' }}</a>
-    </nav>
+    <div class="app-card mp-tabview">
+        <nav class="mp-tabs mp-tabview__tabs" aria-label="Vue par type d’annonce">
+            @if ($showBesoinsTab)
+                <a href="{{ $mkQuery(['tab' => 'besoins']) }}" class="mp-tab {{ $mpTab === 'besoins' ? 'is-active' : '' }}" @if ($mpTab === 'besoins') aria-current="page" @endif>Opportunités</a>
+            @endif
+            @if ($showServicesTab)
+                <a href="{{ $mkQuery(['tab' => 'services']) }}" class="mp-tab {{ $mpTab === 'services' ? 'is-active' : '' }}" @if ($mpTab === 'services') aria-current="page" @endif>Services</a>
+            @endif
+            <a href="{{ $mkQuery(['tab' => 'produits']) }}" class="mp-tab {{ $mpTab === 'produits' ? 'is-active' : '' }}" @if ($mpTab === 'produits') aria-current="page" @endif>{{ ($profileSlug ?? '') === 'artisan' ? 'Catalogue' : (($profileSlug ?? '') === 'particulier' ? 'Fournisseurs' : 'Produits') }}</a>
+        </nav>
 
+        @if ($slug === 'batiment')
+            @php
+                $mpBatActive = static function (string $tab, ?string $sk = null) use ($mpTab, $mpSk): bool {
+                    if ($mpTab !== $tab) {
+                        return false;
+                    }
+                    if ($sk === null) {
+                        return $mpSk === '';
+                    }
+
+                    return $mpSk === $sk;
+                };
+            @endphp
+            <nav class="mp-categories" aria-label="Rubriques marketplace">
+                <a href="{{ $mkQuery(['tab' => 'produits']) }}"
+                   class="mp-categories__link {{ $mpBatActive('produits') ? 'is-active' : '' }}">Fournisseurs</a>
+                <a href="{{ $mkQuery(['tab' => 'services', 'service_kind' => 'artisan']) }}"
+                   class="mp-categories__link {{ $mpBatActive('services', 'artisan') ? 'is-active' : '' }}">Artisans</a>
+            </nav>
+        @endif
+        @if ($slug === 'particulier')
+            @php
+                $mpCatActive = static function (string $tab, ?string $sk = null) use ($mpTab, $mpSk): bool {
+                    if ($mpTab !== $tab) {
+                        return false;
+                    }
+                    if ($sk === null) {
+                        return $mpSk === '';
+                    }
+
+                    return $mpSk === $sk;
+                };
+            @endphp
+            <nav class="mp-categories" aria-label="Rubriques marketplace">
+                <a href="{{ $mkQuery(['tab' => 'services', 'service_kind' => 'entrepreneur']) }}"
+                   class="mp-categories__link {{ $mpCatActive('services', 'entrepreneur') ? 'is-active' : '' }}">Prestataires BTP</a>
+                <a href="{{ $mkQuery(['tab' => 'produits']) }}"
+                   class="mp-categories__link {{ $mpCatActive('produits') ? 'is-active' : '' }}">Fournisseurs</a>
+                <a href="{{ $mkQuery(['tab' => 'services', 'service_kind' => 'artisan']) }}"
+                   class="mp-categories__link {{ $mpCatActive('services', 'artisan') ? 'is-active' : '' }}">Artisans</a>
+            </nav>
+        @endif
+
+        <div class="mp-tabview__panel" role="tabpanel" aria-label="{{ $mpTab === 'produits' ? 'Produits' : ($mpTab === 'services' ? 'Services' : 'Opportunités') }}">
+            <form method="get" action="{{ $baseMarketplaceUrl }}" class="mp-toolbar mp-toolbar--tabpanel">
+                <input type="hidden" name="tab" value="{{ $mpTab }}">
+                <div class="mp-toolbar__search">
+                    <label class="mp-visually-hidden" for="mq">Rechercher une annonce</label>
+                    <span class="mp-toolbar__search-icon" aria-hidden="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+                    </span>
+                    <input type="search" name="q" id="mq" value="{{ request('q') }}" placeholder="Rechercher…" class="mp-toolbar__input" autocomplete="off">
+                    <button type="submit" class="mp-toolbar__submit app-btn app-btn--inline app-btn--sm">Rechercher</button>
+                </div>
+                <div class="mp-toolbar__filters">
+                    <div class="app-field app-field--inline mp-toolbar__field">
+                        <label for="mcat">Catégorie</label>
+                        <select name="category_id" id="mcat" class="mp-select">
+                            <option value="">Toutes</option>
+                            @if (! empty($marketplaceData['categories']))
+                                @foreach ($marketplaceData['categories'] as $c)
+                                    <option value="{{ $c['id'] ?? '' }}" @selected((string) request('category_id') === (string) ($c['id'] ?? ''))>
+                                        {{ $c['name'] ?? '—' }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                    </div>
+                    @if ($mpTab === 'services')
+                        <div class="app-field app-field--inline mp-toolbar__field">
+                            <label for="msk">Type</label>
+                            <select name="service_kind" id="msk" class="mp-select">
+                                <option value="">Tous</option>
+                                <option value="artisan" @selected(request('service_kind') === 'artisan')>Artisans</option>
+                                @if (($profileSlug ?? '') !== 'batiment')
+                                    <option value="entrepreneur" @selected(request('service_kind') === 'entrepreneur')>Entreprise bâtiment</option>
+                                @endif
+                            </select>
+                        </div>
+                    @endif
+                    @if ($mpTab === 'besoins')
+                        <div class="app-field app-field--inline mp-toolbar__field">
+                            <label for="mowner">{{ ($profileSlug ?? '') === 'artisan' ? 'Type de client' : 'Auteur' }}</label>
+                            <select name="owner" id="mowner" class="mp-select">
+                                <option value="">Tous</option>
+                                <option value="particulier" @selected(request('owner') === 'particulier')>Particuliers</option>
+                                @if (($profileSlug ?? '') === 'artisan')
+                                    <option value="pro" @selected(in_array(request('owner'), ['pro', 'entrepreneur_batiment'], true))>Professionnels (BTP)</option>
+                                @else
+                                    <option value="entrepreneur_batiment" @selected(request('owner') === 'entrepreneur_batiment')>Entreprise bâtiment</option>
+                                @endif
+                            </select>
+                        </div>
+                    @endif
+                    @if ($mpTab === 'produits')
+                        <div class="app-field app-field--inline mp-toolbar__field">
+                            <label for="mcatscope">Rayon</label>
+                            <select name="cat_scope" id="mcatscope" class="mp-select">
+                                <option value="">Tous</option>
+                                <option value="product" @selected(request('cat_scope') === 'product')>Produits</option>
+                                <option value="service" @selected(request('cat_scope') === 'service')>Services</option>
+                                <option value="both" @selected(request('cat_scope') === 'both')>Mixtes</option>
+                            </select>
+                        </div>
+                        <div class="app-field app-field--inline mp-toolbar__field">
+                            <label for="muid">N° vendeur</label>
+                            <input type="number" name="user_id" id="muid" class="mp-select" style="min-width:7rem;" min="1" step="1" value="{{ old('user_id', request('user_id')) }}" placeholder="—">
+                        </div>
+                    @endif
+                    <div class="app-field app-field--inline mp-toolbar__field">
+                        <label for="mpp">Par page</label>
+                        <select name="per_page" id="mpp" class="mp-select">
+                            @foreach ([12, 24, 48] as $pp)
+                                <option value="{{ $pp }}" @selected((int) request('per_page', 12) === $pp)>{{ $pp }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    @php
+                        $hasMpFilters = filled(request('q'))
+                            || filled(request('category_id'))
+                            || ($mpTab === 'services' && filled(request('service_kind')))
+                            || ($mpTab === 'besoins' && filled(request('owner')))
+                            || ($mpTab === 'produits' && (filled(request('user_id')) || filled(request('cat_scope'))))
+                            || (int) request('per_page', 12) !== 12;
+                    @endphp
+                    @if ($hasMpFilters)
+                        <a href="{{ $baseMarketplaceUrl }}?{{ http_build_query(['tab' => $mpTab]) }}" class="mp-toolbar__reset app-text-link">Réinitialiser</a>
+                    @endif
+                </div>
+            </form>
+
+            <div class="mp-tabview__content">
     @if ($mpTab === 'produits')
-        <section class="mp-section app-mt" aria-labelledby="mp-products-title">
+        <section class="mp-section mp-section--in-tab" aria-labelledby="mp-products-title">
             <div class="mp-section__head">
                 <h2 id="mp-products-title" class="mp-section-title">
                     @if (($mpProdPill ?? '') !== '')
                         <span class="mp-pill mp-pill--supply">{{ $mpProdPill }}</span>
                     @endif
-                    {{ $mpProdTitle }}
+                    <span>Produits</span>
                 </h2>
+                <span class="mp-section__count">{{ $productsTotal }} résultat(s)</span>
             </div>
             @if (count($products))
                 <div class="mp-grid">
@@ -227,18 +279,35 @@
                                         <span>{{ $initial }}</span>
                                     </div>
                                 @endif
+                                @if (! empty($row['category']['name']))
+                                    <span class="mp-card__badge mp-card__badge--cat">{{ $row['category']['name'] }}</span>
+                                @endif
+                                @if (($row['status'] ?? '') === 'approved')
+                                    <span class="mp-card__badge mp-card__badge--status">Approuvé</span>
+                                @endif
                                 @if (! empty($row['price_display_fr']))
                                     <span class="mp-card__price-tag">{{ $row['price_display_fr'] }}</span>
                                 @endif
                             </div>
                             <div class="mp-card__body">
-                                @if (! empty($row['category']['name']))
-                                    <p class="mp-card__category">{{ $row['category']['name'] }}</p>
-                                @endif
                                 <h3 class="mp-card__title">{{ $title }}</h3>
                                 @if (! empty($row['description']))
                                     <p class="mp-card__excerpt">{{ \Illuminate\Support\Str::limit(strip_tags($row['description']), 100) }}</p>
                                 @endif
+                                @php
+                                    $stock = (int) ($row['stock_units'] ?? 0);
+                                    $stockClass = $stock <= 0 ? 'mp-stock--order' : ($stock < 5 ? 'mp-stock--low' : 'mp-stock--ok');
+                                    $stockLabel = $stock <= 0 ? 'Sur commande' : ($stock < 5 ? 'Stock limité' : 'En stock');
+                                @endphp
+                                <div class="mp-card__meta-row">
+                                    @if (! empty($row['rating']))
+                                        <span class="mp-card__rating">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                            {{ number_format((float) $row['rating'], 1, ',', '') }}
+                                        </span>
+                                    @endif
+                                    <span class="mp-stock {{ $stockClass }}">{{ $stockLabel }}</span>
+                                </div>
                                 <div class="mp-card__footer">
                                     @if (! empty($row['owner']['company_name']))
                                         <span class="mp-card__seller">{{ $row['owner']['company_name'] }}</span>
@@ -258,17 +327,18 @@
             @endif
         </section>
     @elseif ($mpTab === 'services')
-        <section class="mp-section app-mt" aria-labelledby="mp-services-title">
+        <section class="mp-section mp-section--in-tab" aria-labelledby="mp-services-title">
             <div class="mp-section__head">
                 <h2 id="mp-services-title" class="mp-section-title">
                     @if (($mpSrvPill ?? '') !== '')
                         <span class="mp-pill mp-pill--service">{{ $mpSrvPill }}</span>
                     @endif
-                    {{ $mpSrvTitle }}
+                    <span>Services</span>
                 </h2>
+                <span class="mp-section__count">{{ $servicesTotal }} résultat(s)</span>
             </div>
             @if (count($services))
-                <div class="mp-grid">
+                <div class="mp-grid {{ $slug === 'particulier' && $mpSk === 'entrepreneur' ? 'mp-grid--single' : '' }}">
                     @foreach ($services as $row)
                         @php
                             $title = $row['title'] ?? 'Sans titre';
@@ -301,14 +371,17 @@
                                         <span>{{ $initial }}</span>
                                     </div>
                                 @endif
-                                @if ($kindLabel !== '')
-                                    <span class="mp-card__badge mp-card__badge--kind">{{ $kindLabel }}</span>
+                                @if (! empty($row['category']['name']))
+                                    <span class="mp-card__badge mp-card__badge--cat">{{ $row['category']['name'] }}</span>
+                                @endif
+                                @if (($row['status'] ?? '') === 'approved')
+                                    <span class="mp-card__badge mp-card__badge--status">Approuvé</span>
+                                @endif
+                                @if ($priceLine !== '')
+                                    <span class="mp-card__price-tag">{{ $priceLine }}</span>
                                 @endif
                             </div>
                             <div class="mp-card__body">
-                                @if (! empty($row['category']['name']))
-                                    <p class="mp-card__category">{{ $row['category']['name'] }}</p>
-                                @endif
                                 <h3 class="mp-card__title">{{ $title }}</h3>
                                 @if (! empty($row['location']))
                                     <p class="mp-card__location">
@@ -316,15 +389,20 @@
                                         {{ $row['location'] }}
                                     </p>
                                 @endif
-                                @if ($priceLine !== '')
-                                    <p class="mp-card__price-line">{{ \Illuminate\Support\Str::limit($priceLine, 80) }}</p>
+                                @if (! empty($row['description']))
+                                    <p class="mp-card__excerpt">{{ \Illuminate\Support\Str::limit(strip_tags($row['description']), 100) }}</p>
+                                @endif
+                                @if (! empty($row['rating']) && (float) $row['rating'] > 0)
+                                    <div class="mp-card__meta-row">
+                                        <span class="mp-card__rating">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                            {{ number_format((float) $row['rating'], 1, ',', '') }}
+                                        </span>
+                                    </div>
                                 @endif
                                 <div class="mp-card__footer">
                                     @if (! empty($row['owner']['name']))
                                         <span class="mp-card__seller">{{ $row['owner']['name'] }}</span>
-                                    @endif
-                                    @if (! empty($row['rating']) && (float) $row['rating'] > 0)
-                                        <span class="mp-card__rating" title="Note">{{ number_format((float) $row['rating'], 1, ',', ' ') }} ★</span>
                                     @endif
                                 </div>
                             </div>
@@ -336,14 +414,15 @@
             @endif
         </section>
     @else
-        <section class="mp-section app-mt" aria-labelledby="mp-besoins-title">
+        <section class="mp-section mp-section--in-tab" aria-labelledby="mp-besoins-title">
             <div class="mp-section__head">
                 <h2 id="mp-besoins-title" class="mp-section-title">
                     @if (($mpBesPill ?? '') !== '')
                         <span class="mp-pill mp-pill--demand">{{ $mpBesPill }}</span>
                     @endif
-                    {{ $mpBesTitle }}
+                    <span>Opportunités</span>
                 </h2>
+                <span class="mp-section__count">{{ $besoinsTotal }} résultat(s)</span>
             </div>
             @if (count($besoins))
                 <div class="mp-grid mp-grid--besoins">
@@ -372,6 +451,12 @@
                             </div>
                             <div class="mp-card__body">
                                 <h3 class="mp-card__title">{{ $title }}</h3>
+                                @if (! empty($row['start_label']) || ! empty($row['short_date']))
+                                    <p class="mp-card__meta app-muted app-text-sm app-mb-0">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="vertical-align:-2px;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                        {{ $row['start_label'] ?? $row['short_date'] }}
+                                    </p>
+                                @endif
                                 @if (! empty($row['place']))
                                     <p class="mp-card__location">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -398,6 +483,9 @@
             @endif
         </section>
     @endif
+            </div>{{-- .mp-tabview__content --}}
+        </div>{{-- .mp-tabview__panel --}}
+    </div>{{-- .mp-tabview --}}
 @else
     @if (empty($apiError))
         <div class="app-card app-mt">

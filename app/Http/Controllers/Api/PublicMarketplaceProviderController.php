@@ -28,15 +28,17 @@ class PublicMarketplaceProviderController extends Controller
             ->whereIn('profile_type', $profileTypes);
 
         $this->excludeSelfFromMarketplace($q, $request);
+        $this->excludeEntrepreneurProfilesForBatimentViewer($q, $request);
 
         $search = $request->string('q')->trim()->toString();
         if ($search !== '') {
+            // Champs visibles sur les cartes marketplace (nom, activité, localisation).
             $q->where(function ($b) use ($search) {
                 $b->where('name', 'like', "%{$search}%")
                     ->orWhere('company_name', 'like', "%{$search}%")
-                    ->orWhere('company_address', 'like', "%{$search}%")
-                    ->orWhere('town', 'like', "%{$search}%")
-                    ->orWhere('activity', 'like', "%{$search}%");
+                    ->orWhere('activity_type', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhere('commune', 'like', "%{$search}%");
             });
         }
 
@@ -47,6 +49,33 @@ class PublicMarketplaceProviderController extends Controller
         $paginated->getCollection()->transform(fn (User $u) => $this->row($u));
 
         return response()->json($paginated);
+    }
+
+    public function show(Request $request, User $user): JsonResponse
+    {
+        abort_unless(
+            $user->role === User::ROLE_USER
+                && $user->is_active
+                && $user->profile_completed_at !== null
+                && $user->profile_validation_status === User::VALIDATION_APPROVED
+                && in_array($user->profile_type, [
+                    User::PROFILE_ENTREPRISE_FOURNISSEUR,
+                    User::PROFILE_ARTISAN,
+                    User::PROFILE_ENTREPRENEUR_BATIMENT,
+                ], true),
+            404,
+        );
+
+        if ($request->user()?->id === $user->id) {
+            abort(404);
+        }
+
+        if ($this->isBatimentViewer($request)
+            && $user->profile_type === User::PROFILE_ENTREPRENEUR_BATIMENT) {
+            abort(404);
+        }
+
+        return response()->json(['data' => $this->row($user, true)]);
     }
 
     /**
@@ -71,25 +100,49 @@ class PublicMarketplaceProviderController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function row(User $u): array
+    private function row(User $u, bool $detail = false): array
     {
         $displayName = $this->displayName($u);
-        $location = trim((string) ($u->company_address ?? ''));
-        if ($location === '') {
-            $location = trim((string) ($u->town ?? ''));
+        $description = trim((string) ($u->company_description ?? ''));
+        if ($description === '') {
+            $description = trim((string) ($u->bio ?? ''));
         }
 
-        return [
+        $row = [
             'user_id' => $u->id,
             'display_name' => $displayName,
             'profile_type' => $u->profile_type,
             'company_name' => $u->company_name,
-            'location' => $location !== '' ? $location : null,
-            'activity' => $u->activity,
+            'location' => $this->resolveLocation($u),
+            'activity' => $u->activity_type,
+            'expertise' => $u->activity_type,
+            'description' => $description !== '' ? $description : null,
             'avatar_url' => $u->avatar_path
                 ? storage_public_url($u->avatar_path)
                 : null,
         ];
+
+        if ($detail) {
+            $row['company_address'] = $u->company_address;
+        }
+
+        return $row;
+    }
+
+    private function resolveLocation(User $u): ?string
+    {
+        $parts = array_values(array_filter([
+            trim((string) ($u->commune ?? '')),
+            trim((string) ($u->city ?? '')),
+        ], fn (string $v) => $v !== ''));
+
+        if ($parts !== []) {
+            return implode(', ', $parts);
+        }
+
+        $address = trim((string) ($u->company_address ?? ''));
+
+        return $address !== '' ? $address : null;
     }
 
     private function displayName(User $u): string

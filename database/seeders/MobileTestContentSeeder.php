@@ -262,6 +262,84 @@ class MobileTestContentSeeder extends Seeder
             );
         }
 
+        // ——— Devis reçus par le fournisseur (hors commandes catalogue MOB-FOUR-*) ———
+        $devisFournisseurRows = [
+            [
+                'ref' => 'MOB-DEVIS-FOUR-001',
+                'title' => '[MOBILE] Demande devis — lot matériaux Cocody',
+                'client_name' => $particulier->name,
+                'place' => 'Cocody, Abidjan',
+                'contact' => $particulier->phone ?? $particulier->email,
+                'status' => 'non_traite',
+                'client_user_id' => $particulier->id,
+                'days_ago' => 2,
+                'lines' => [
+                    ['label' => '[MOBILE] Ciment CPJ 42,5 (sac 50 kg)', 'qty' => 30, 'unit_price_fcfa' => 0],
+                    ['label' => 'Livraison chantier', 'qty' => 1, 'unit_price_fcfa' => 0],
+                ],
+            ],
+            [
+                'ref' => 'MOB-DEVIS-FOUR-002',
+                'title' => '[MOBILE] Demande devis — équipement BTP',
+                'client_name' => $batiment->company_name ?? $batiment->name,
+                'place' => 'Plateau',
+                'contact' => $batiment->phone ?? $batiment->email,
+                'status' => 'envoye',
+                'client_user_id' => $batiment->id,
+                'days_ago' => 5,
+                'lines' => [
+                    ['label' => '[MOBILE] Brouette renforcée 100 L', 'qty' => 5, 'unit_price_fcfa' => 18500],
+                    ['label' => '[MOBILE] Seau gradué chantier', 'qty' => 8, 'unit_price_fcfa' => 2500],
+                ],
+            ],
+            [
+                'ref' => 'MOB-PROP-FOUR-001',
+                'title' => '[MOBILE] Proposition client externe — Marcory',
+                'client_name' => 'Société Chantier Marcory SARL',
+                'place' => 'Marcory',
+                'contact' => '+2250700000001',
+                'status' => 'en_cours',
+                'client_user_id' => null,
+                'days_ago' => 3,
+                'lines' => [
+                    ['label' => 'Fourniture consommables', 'qty' => 1, 'unit_price_fcfa' => 120000],
+                ],
+            ],
+        ];
+
+        foreach ($devisFournisseurRows as $row) {
+            $at = Carbon::now()->subDays((int) $row['days_ago']);
+            $processedAt = in_array($row['status'], ['valide', 'envoye', 'rejete'], true)
+                ? $at->copy()->addDay()->toDateString()
+                : null;
+
+            $devis = Devis::query()->updateOrCreate(
+                [
+                    'user_id' => $fournisseur->id,
+                    'order_reference' => $row['ref'],
+                ],
+                [
+                    'title' => $row['title'],
+                    'client_name' => $row['client_name'],
+                    'place' => $row['place'],
+                    'contact' => $row['contact'],
+                    'status' => $row['status'],
+                    'client_user_id' => $row['client_user_id'],
+                    'processed_at' => $processedAt,
+                    'line_items' => [
+                        'source' => 'marketplace_request',
+                        'lignes' => $row['lines'],
+                    ],
+                    'notes' => 'Devis seed MobileTestContentSeeder — écran « Mes devis » fournisseur.',
+                ]
+            );
+
+            DB::table('devis')->where('id', $devis->id)->update([
+                'created_at' => $at,
+                'updated_at' => $at,
+            ]);
+        }
+
         // ——— Commandes reçues par le fournisseur mobile (devis : user_id = fournisseur) ———
         $cmdFournisseurRows = [
             [

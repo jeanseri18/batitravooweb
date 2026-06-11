@@ -23,7 +23,20 @@ class RegisterController extends Controller
             return redirect()->route('app.home');
         }
 
-        return view('app.auth.register');
+        $preselect = $request->query('profil');
+        $allowed = [
+            User::PROFILE_PARTICULIER,
+            User::PROFILE_ARTISAN,
+            User::PROFILE_ENTREPRENEUR_BATIMENT,
+            User::PROFILE_ENTREPRISE_FOURNISSEUR,
+        ];
+        if (! in_array($preselect, $allowed, true)) {
+            $preselect = null;
+        }
+
+        return view('app.auth.register', [
+            'preselectProfile' => $preselect,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

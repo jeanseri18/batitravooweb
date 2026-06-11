@@ -51,16 +51,17 @@ html {
 }
 
 .app-body--workspace {
+    --font: "DM Sans", system-ui, -apple-system, sans-serif;
+    --bg-page: #ffffff;
+    font-family: var(--font);
+    letter-spacing: -0.01em;
     display: flex;
     flex-direction: column;
     height: 100vh;
     max-height: 100vh;
     overflow: hidden;
-    background-color: var(--bg-page);
-    background-image:
-        radial-gradient(880px 460px at 10% -12%, var(--orange-brush), transparent 55%),
-        radial-gradient(720px 400px at 94% 8%, rgba(0, 31, 63, 0.06), transparent 50%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, transparent 40%);
+    background-color: #ffffff;
+    background-image: none;
 }
 
 .app-skip-link {
@@ -166,6 +167,10 @@ html {
     max-height: 40px;
 }
 
+.app-brand-logo-img--header {
+    max-height: 48px;
+}
+
 .app-brand-logo-img--sm {
     max-height: 32px;
 }
@@ -195,6 +200,11 @@ html {
 
 .app-brand-logo-svg--sidebar {
     max-height: 40px;
+}
+
+.app-brand-logo-svg--header {
+    max-height: 48px;
+    max-width: min(240px, 100%);
 }
 
 .app-brand-logo-svg--sm {
@@ -509,6 +519,7 @@ html {
     min-width: 0;
 }
 
+.app-workflow-tile__row .app-nav-ico-wrap,
 .app-workflow-tile__row .app-nav-ico {
     flex-shrink: 0;
 }
@@ -1311,6 +1322,23 @@ main.app-content:focus {
     flex-wrap: wrap;
     align-items: flex-end;
     gap: 0.5rem 0.65rem;
+}
+
+.app-input {
+    padding: 0.65rem 0.85rem;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--navy);
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    min-height: 2.75rem;
+}
+
+.app-input:focus {
+    outline: none;
+    border-color: var(--orange);
+    box-shadow: var(--ring);
 }
 
 .app-cart-add__form .app-input {
@@ -2416,6 +2444,43 @@ main.app-content:focus {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
+.mp-grid--single {
+    grid-template-columns: 1fr;
+}
+
+.mp-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem 0;
+}
+
+.mp-categories__link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--navy);
+    background: #f4f6f9;
+    border: 1px solid var(--border);
+}
+
+.mp-categories__link.is-active {
+    background: var(--blue, #2f6fed);
+    border-color: transparent;
+    color: #fff;
+}
+
+.msn__filters {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
 .mp-card {
     background: var(--bg-card);
     border-radius: var(--radius);
@@ -2457,8 +2522,10 @@ main.app-content:focus {
 .mp-card__img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     display: block;
+    background: #f0f2f5;
 }
 
 .mp-card__placeholder {
@@ -2618,6 +2685,11 @@ main.app-content:focus {
     margin-bottom: 0.75rem;
 }
 
+.app-card.mp-detail {
+    padding: 0;
+    overflow: hidden;
+}
+
 .mp-detail {
     overflow: hidden;
 }
@@ -2629,11 +2701,39 @@ main.app-content:focus {
     max-height: min(42vh, 22rem);
 }
 
+@media (min-width: 768px) {
+    .app-card.mp-detail {
+        display: grid;
+        grid-template-columns: minmax(260px, 40%) 1fr;
+        grid-template-areas:
+            "media body"
+            "owner owner";
+        align-items: stretch;
+    }
+
+    .mp-detail__media {
+        grid-area: media;
+        max-height: none;
+        min-height: 100%;
+        aspect-ratio: auto;
+    }
+
+    .mp-detail__body {
+        grid-area: body;
+    }
+
+    .mp-detail__owner {
+        grid-area: owner;
+    }
+}
+
 .mp-detail__img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     display: block;
+    background: #f0f2f5;
 }
 
 .mp-detail__placeholder {
@@ -2649,7 +2749,7 @@ main.app-content:focus {
 }
 
 .mp-detail__body {
-    padding: 1.1rem 1.2rem 1.25rem;
+    padding: 1.25rem 1.35rem 1.5rem;
 }
 
 .mp-detail__title {
@@ -2680,7 +2780,7 @@ main.app-content:focus {
 }
 
 .mp-detail__price--budget {
-    background: linear-gradient(135deg, #001f3f 0%, #0a2540 100%);
+    background: var(--navy);
 }
 
 .mp-detail__pricing {
@@ -3412,7 +3512,9 @@ main.app-content:focus {
 .app-supplier-home-tile__img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
+    background: #f0f2f5;
 }
 
 .app-supplier-home-tile__img-ph {

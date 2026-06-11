@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\PublicProductController;
 use App\Http\Controllers\Api\PublicServiceController;
 use App\Models\Devis;
 use App\Models\SupportTicket;
+use App\Services\DevisScopeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -191,8 +192,12 @@ class MeApiBridge
                 : null,
         ], fn ($v) => $v !== null && $v !== '' && $v !== 0);
 
+        $serviceKind = $request->filled('service_kind') ? (string) $request->query('service_kind') : null;
+        if ($profileSlug === 'batiment' && $serviceKind === 'entrepreneur') {
+            $serviceKind = 'artisan';
+        }
         $serviceQuery = array_merge($productQuery, array_filter([
-            'service_kind' => $request->filled('service_kind') ? (string) $request->query('service_kind') : null,
+            'service_kind' => $serviceKind,
         ], fn ($v) => $v !== null && $v !== ''));
 
         $besoinQuery = array_filter([
@@ -210,6 +215,12 @@ class MeApiBridge
         $servicesResponse = app(PublicServiceController::class)->index($servicesReq);
         $this->assertOk($servicesResponse);
         $servicesPayload = $this->decode($servicesResponse);
+        if ($profileSlug === 'batiment' && is_array($servicesPayload['data'] ?? null)) {
+            $servicesPayload['data'] = array_values(array_filter(
+                $servicesPayload['data'],
+                static fn (array $row): bool => ($row['service_kind'] ?? '') !== 'entrepreneur',
+            ));
+        }
 
         $besoinsReq = Request::create('/', 'GET', $besoinQuery);
         $besoinsResponse = app(PublicBesoinController::class)->index($besoinsReq);
@@ -235,14 +246,76 @@ class MeApiBridge
     }
 
     /**
-     * @return array<string, mixed>
+     * Liste devis filtrée côté web (parité mobile devis_scope.dart).
+     *
+     * @return array{data: list<array<string, mixed>>, meta: array<string, mixed>}
      */
-    public function devisIndex(Request $request): array
-    {
+    public function devisIndex(
+        Request $request,
+        ?string $direction = null,
+        ?string $kind = null,
+        bool $supplierOrdersOnly = false,
+        ?string $profileSlug = null,
+    ): array {
         $response = app(ApiMeDevisController::class)->index($request);
         $this->assertOk($response);
 
-        return $this->decode($response);
+        $payload = $this->decode($response);
+        $rows = $payload['data'] ?? [];
+        if (! is_array($rows)) {
+            $rows = [];
+        }
+
+        $userId = (int) ($request->user()?->id ?? 0);
+        $slug = $profileSlug ?? (string) $request->segment(2);
+        $scope = app(DevisScopeService::class);
+
+        $direction = in_array($direction, [DevisScopeService::DIRECTION_RECEIVED, DevisScopeService::DIRECTION_SENT], true)
+            ? $direction
+            : null;
+        $kind = in_array($kind, [DevisScopeService::KIND_CATALOG, DevisScopeService::KIND_MARKETPLACE, DevisScopeService::KIND_ALL], true)
+            ? $kind
+            : DevisScopeService::KIND_ALL;
+
+        $statusFilter = trim((string) $request->query('status', ''));
+        $missionFilter = trim((string) $request->query('mission', 'all'));
+
+        $kindFilter = $kind === DevisScopeService::KIND_ALL ? null : $kind;
+        $statusCounts = $scope->countByStatusChip(
+            $rows,
+            $userId,
+            $slug,
+            $direction,
+            $kindFilter,
+            $supplierOrdersOnly,
+            $missionFilter !== '' ? $missionFilter : null,
+        );
+
+        $filtered = $scope->filterForProfile(
+            $rows,
+            $userId,
+            $slug,
+            $direction,
+            $kindFilter,
+            $supplierOrdersOnly,
+            $statusFilter !== '' ? $statusFilter : null,
+            $missionFilter !== '' ? $missionFilter : null,
+        );
+
+        $dirForEnrich = $direction ?? DevisScopeService::DIRECTION_RECEIVED;
+        $payload['data'] = array_map(
+            fn (array $row) => $scope->enrichRow($row, $userId, $dirForEnrich),
+            $filtered,
+        );
+        $payload['meta'] = array_merge($payload['meta'] ?? [], [
+            'direction' => $direction,
+            'kind' => $kind,
+            'supplier_orders_only' => $supplierOrdersOnly,
+            'total_filtered' => count($payload['data']),
+            'status_counts' => $statusCounts,
+        ]);
+
+        return $payload;
     }
 
     /**

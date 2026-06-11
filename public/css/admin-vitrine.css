@@ -1,0 +1,376 @@
+/**
+ * Harmonisation admin ↔ vitrine BTP
+ * Plat, bordures nettes, Plus Jakarta Sans, tokens vitrine
+ */
+:root {
+    --brand-navy: #002744;
+    --brand-navy-2: #1a3d5c;
+    --brand-orange: #f19b34;
+    --brand-orange-2: #d4852a;
+    --bg: #eef1f4;
+    --surface: #ffffff;
+    --surface-2: #ffffff;
+    --surface-3: #eef1f4;
+    --border: #c5d0db;
+    --border-strong: #c5d0db;
+    --hairline: #dde3ea;
+    --text-1: #002744;
+    --text-2: #1a3d5c;
+    --text-3: #5c6f82;
+    --text-4: #5c6f82;
+    --side-bg: #002744;
+    --side-bg-2: #00152e;
+    --side-text: rgba(255, 255, 255, 0.82);
+    --side-text-strong: #ffffff;
+    --side-text-muted: rgba(255, 255, 255, 0.55);
+    --side-border: rgba(255, 255, 255, 0.12);
+    --side-hover: rgba(255, 255, 255, 0.06);
+    --side-active-bg: rgba(241, 155, 52, 0.14);
+    --side-active-bar: #f19b34;
+    --shadow-xs: none;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --r-xs: 6px;
+    --r-sm: 8px;
+    --r: 12px;
+    --r-lg: 16px;
+    --r-xl: 20px;
+    --r-pill: 9999px;
+}
+
+body.admin-body,
+body.admin-login-page {
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif !important;
+}
+
+/* —— Shell —— */
+body.admin-body {
+    background: var(--bg) !important;
+}
+
+body.admin-body .admin-side {
+    border-right: 2px solid var(--border);
+}
+
+body.admin-body .admin-side__brand {
+    border-bottom: 2px solid var(--side-border);
+}
+
+body.admin-body .admin-side__brand-logo-link {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    text-decoration: none;
+    line-height: 0;
+}
+
+body.admin-body .admin-side__brand-logo-link .admin-brand-logo-img {
+    max-height: 40px;
+    width: auto;
+    filter: none;
+}
+
+body.admin-body .is-collapsed .admin-side__brand-logo-link .admin-brand-logo-img {
+    max-height: 32px;
+}
+
+body.admin-body .admin-side__brand-name small {
+    color: var(--brand-orange);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+body.admin-body .admin-side__section {
+    color: var(--brand-orange);
+}
+
+body.admin-body .admin-nav-link {
+    border-radius: var(--r-sm);
+    border: 2px solid transparent;
+}
+
+body.admin-body .admin-nav-link.is-on {
+    border-color: rgba(241, 155, 52, 0.45);
+}
+
+body.admin-body .admin-nav-link.is-on::before {
+    width: 4px;
+    background: var(--brand-orange);
+    border-radius: var(--r-xs);
+}
+
+body.admin-body .admin-header {
+    background: var(--surface) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: 4px solid var(--brand-orange) !important;
+    box-shadow: none !important;
+}
+
+body.admin-body .admin-header__toggle,
+body.admin-body .admin-icon-btn {
+    border-radius: var(--r-sm);
+    border: 2px solid var(--border);
+    box-shadow: none !important;
+}
+
+body.admin-body .admin-header__search-input,
+body.admin-body .admin-profile__btn,
+body.admin-body .admin-menu {
+    border-radius: var(--r-sm);
+    box-shadow: none !important;
+    border: 2px solid var(--border);
+}
+
+body.admin-body .admin-header__search-input:focus {
+    border-color: var(--brand-orange);
+    box-shadow: none !important;
+}
+
+body.admin-body .admin-profile__avatar {
+    border-radius: var(--r-sm);
+    background: var(--brand-orange);
+    color: var(--side-bg-2);
+    font-weight: 800;
+}
+
+/* —— Cartes & KPI —— */
+body.admin-body .card,
+body.admin-body .admin-card,
+body.admin-body .admin-kpi,
+body.admin-body .admin-stat,
+body.admin-body .admin-panel,
+body.admin-body .admin-chart-card {
+    border-radius: var(--r-lg) !important;
+    border: 2px solid var(--border) !important;
+    box-shadow: none !important;
+}
+
+body.admin-body .admin-kpi:hover {
+    transform: none !important;
+    border-color: var(--brand-orange) !important;
+    box-shadow: none !important;
+}
+
+body.admin-body .admin-kpi__ico {
+    border-radius: var(--r-sm);
+    border: 2px solid var(--border);
+}
+
+/* —— Boutons —— */
+body.admin-body .btn,
+body.admin-body .admin-btn {
+    border-radius: var(--r) !important;
+    box-shadow: none !important;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+    border-width: 2px !important;
+}
+
+body.admin-body .admin-btn--navy,
+body.admin-body .btn-navy,
+body.admin-body .admin-btn--orange,
+body.admin-body .btn-orange {
+    background: var(--brand-orange) !important;
+    border-color: var(--brand-orange) !important;
+    color: #00152e !important;
+}
+
+body.admin-body .admin-btn--navy:hover,
+body.admin-body .btn-navy:hover,
+body.admin-body .admin-btn--orange:hover,
+body.admin-body .btn-orange:hover {
+    background: var(--brand-navy) !important;
+    border-color: var(--brand-navy) !important;
+    color: #fff !important;
+}
+
+body.admin-body .admin-btn--ghost,
+body.admin-body .btn-ghost {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+    color: var(--text-1) !important;
+}
+
+body.admin-body .admin-btn--ghost:hover,
+body.admin-body .btn-ghost:hover {
+    border-color: var(--brand-navy) !important;
+    background: var(--bg) !important;
+}
+
+body.admin-body .admin-btn--soft {
+    background: var(--bg) !important;
+    border: 2px solid var(--border) !important;
+    color: var(--text-1) !important;
+}
+
+body.admin-body .admin-btn--soft:hover {
+    border-color: var(--brand-orange) !important;
+}
+
+body.admin-body .admin-btn--danger {
+    border-width: 2px !important;
+    border-radius: var(--r) !important;
+}
+
+/* —— Formulaires —— */
+body.admin-body .admin-field__control,
+body.admin-body .admin-field__input,
+body.admin-body input[type="text"],
+body.admin-body input[type="email"],
+body.admin-body input[type="password"],
+body.admin-body input[type="search"],
+body.admin-body input[type="number"],
+body.admin-body select,
+body.admin-body textarea {
+    border-radius: var(--r-sm) !important;
+    border-width: 2px !important;
+    border-color: var(--border) !important;
+}
+
+body.admin-body .admin-field__control:focus,
+body.admin-body input:focus,
+body.admin-body select:focus,
+body.admin-body textarea:focus {
+    border-color: var(--brand-orange) !important;
+    box-shadow: none !important;
+}
+
+/* —— Tableaux & badges —— */
+body.admin-body .table-wrap,
+body.admin-body table {
+    border-radius: var(--r-sm);
+}
+
+body.admin-body .badge,
+body.admin-body .admin-badge,
+body.admin-body .admin-pill {
+    border-radius: var(--r-pill);
+    border: 1px solid var(--border);
+}
+
+body.admin-body .admin-flash {
+    border-radius: var(--r);
+    border-width: 2px;
+}
+
+/* —— Login admin —— */
+body.admin-login-page {
+    background: var(--bg) !important;
+}
+
+body.admin-login-page .admin-login__hero::before,
+body.admin-login-page .admin-login__hero::after {
+    display: none !important;
+}
+
+body.admin-login-page .admin-login__hero {
+    background: var(--surface) !important;
+    color: var(--text-1) !important;
+    border-right: 2px solid var(--border);
+    border-top: 4px solid var(--brand-orange);
+    border-radius: var(--r-lg) 0 0 var(--r-lg);
+}
+
+body.admin-login-page .admin-login__hero h2 {
+    color: var(--text-1);
+}
+
+body.admin-login-page .admin-login__hero p,
+body.admin-login-page .admin-login__features {
+    color: var(--text-3) !important;
+    opacity: 1 !important;
+}
+
+body.admin-login-page .admin-login__hero-logo .admin-brand-logo-img--on-hero {
+    filter: none;
+}
+
+body.admin-login-page .admin-login__features li::before {
+    border-radius: var(--r-pill);
+}
+
+body.admin-login-page .admin-login__panel {
+    background: var(--bg) !important;
+}
+
+body.admin-login-page .admin-login__box {
+    border-radius: var(--r-lg) !important;
+    border: 2px solid var(--border) !important;
+    box-shadow: none !important;
+}
+
+body.admin-login-page .admin-login__btn {
+    border-radius: var(--r) !important;
+    box-shadow: none !important;
+    background: var(--brand-orange) !important;
+    border: 2px solid var(--brand-orange) !important;
+    color: #00152e !important;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+body.admin-login-page .admin-login__btn:hover {
+    background: var(--brand-navy) !important;
+    border-color: var(--brand-navy) !important;
+    color: #fff !important;
+}
+
+body.admin-login-page .admin-field__control {
+    border-radius: var(--r-sm) !important;
+    border-width: 2px !important;
+}
+
+body.admin-login-page .admin-field__control:focus {
+    border-color: var(--brand-orange) !important;
+    box-shadow: none !important;
+}
+
+body.admin-login-page .admin-link {
+    color: var(--brand-orange);
+    font-weight: 700;
+    border-bottom: 2px solid var(--brand-orange);
+}
+
+body.admin-login-page .admin-login__title {
+    color: var(--text-1);
+    font-weight: 800;
+}
+
+body.admin-login-page .admin-login__eyebrow {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--brand-orange);
+    margin-bottom: 0.5rem;
+}
+
+body.admin-login-page .admin-login__err {
+    border-radius: var(--r);
+    border: 2px solid #fecaca;
+}
+
+/* —— Liens admin —— */
+body.admin-body a.admin-link {
+    color: var(--brand-orange);
+    font-weight: 700;
+    border-bottom: 2px solid var(--brand-orange);
+}
+
+body.admin-body a.admin-link:hover {
+    color: var(--brand-navy);
+}
+
+/* —— Pagination —— */
+body.admin-body .pagination a,
+body.admin-body .pagination span {
+    border-radius: var(--r-sm) !important;
+    border: 2px solid var(--border);
+    box-shadow: none !important;
+}

@@ -5,5 +5,7 @@
         <div class="app-alert app-alert--error" role="alert">{{ $apiError }}</div>
     @endif
 
-    @include('app.shell.partials.'.$page)
+    <div class="app-mockup-page" data-mockup-page="{{ $page ?? '' }}">
+        @include('app.shell.partials.'.$page)
+    </div>
 @endsection

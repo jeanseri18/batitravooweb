@@ -3,20 +3,22 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#0b1f3b">
+    <meta name="theme-color" content="#002744">
     <title>Connexion — Admin {{ config('app.name', 'BATITRAVOO') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ public_asset('css/admin.css') }}?v=9">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ public_asset('css/admin.css') }}?v=11">
+    <link rel="stylesheet" href="{{ public_asset('css/admin-vitrine.css') }}?v=2">
 </head>
 <body class="admin-login-page">
 <div class="admin-login">
     <section class="admin-login__hero" aria-labelledby="hero-title">
         <div class="admin-login__hero-inner">
             <div class="admin-login__hero-logo">
-                @include('admin.partials.brand-logo', ['variant' => 'inverse'])
+                @include('admin.partials.brand-logo')
             </div>
+            <p class="admin-login__eyebrow">Back-office</p>
             <h2 id="hero-title">Pilotez l’écosystème<br>BTP &amp; services</h2>
             <p>Utilisateurs, offres, devis, besoins et candidatures : un même socle de données, aligné sur l’application mobile BATITRAVOO.</p>
             <ul class="admin-login__features">
@@ -30,9 +32,6 @@
 
     <section class="admin-login__panel" aria-labelledby="login-title">
         <div class="admin-login__box">
-            <div class="admin-login__logo">
-                @include('admin.partials.brand-logo')
-            </div>
             <h1 id="login-title" class="admin-login__title">Connexion administrateur</h1>
             <p class="admin-login__sub">Accédez au back-office BATITRAVOO.</p>
 
@@ -89,7 +88,6 @@
     </section>
 </div>
 
-{{-- Sprite d'icônes (pour les flèches d'erreur) --}}
 <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
     <symbol id="admin-ico-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 18L18 6M6 6l12 12" />

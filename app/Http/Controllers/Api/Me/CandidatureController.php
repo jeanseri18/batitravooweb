@@ -177,7 +177,10 @@ class CandidatureController extends Controller
             }
         }
 
-        $town = trim((string) ($applicant?->town ?? ''));
+        $town = trim(implode(', ', array_values(array_filter([
+            trim((string) ($applicant?->commune ?? '')),
+            trim((string) ($applicant?->city ?? '')),
+        ], fn (string $v) => $v !== ''))));
         if ($town === '') {
             $town = trim((string) ($applicant?->company_address ?? ''));
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Concerns;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Laravel\Sanctum\PersonalAccessToken;
 
@@ -37,6 +38,31 @@ trait ResolvesOptionalApiUser
         $user = $this->optionalApiUser($request);
         if ($user !== null && ! $user->isAdmin()) {
             $query->where($column, '!=', (int) $user->id);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Entrepreneur bâtiment : pas d’accès aux fiches des autres entrepreneurs BTP.
+     */
+    protected function isBatimentViewer(Request $request): bool
+    {
+        $user = $this->optionalApiUser($request);
+
+        return $user !== null && $user->profile_type === User::PROFILE_ENTREPRENEUR_BATIMENT;
+    }
+
+    /**
+     * @param  Builder<Model>  $query
+     */
+    protected function excludeEntrepreneurProfilesForBatimentViewer(
+        Builder $query,
+        Request $request,
+        string $profileTypeColumn = 'profile_type',
+    ): Builder {
+        if ($this->isBatimentViewer($request)) {
+            $query->where($profileTypeColumn, '!=', User::PROFILE_ENTREPRENEUR_BATIMENT);
         }
 
         return $query;

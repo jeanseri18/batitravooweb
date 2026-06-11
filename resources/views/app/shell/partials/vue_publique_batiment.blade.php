@@ -22,7 +22,11 @@
             @foreach ($previewBesoins as $b)
                 <li class="app-vue-btp-list__item">
                     <strong>{{ $b['title'] ?? '—' }}</strong>
-                    <span class="app-muted">{{ $b['place'] ?? '—' }} · {{ $b['budget'] ?? '—' }}</span>
+                    <span class="app-muted">
+                        {{ $b['start_label'] ?? ($b['short_date'] ?? '—') }}
+                        · {{ $b['place'] ?? '—' }}
+                        · {{ $b['budget'] ?? '—' }}
+                    </span>
                 </li>
             @endforeach
         </ul>

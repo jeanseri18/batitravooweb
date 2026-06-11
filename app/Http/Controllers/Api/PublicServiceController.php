@@ -31,6 +31,14 @@ class PublicServiceController extends Controller
             $this->excludeSelfFromMarketplace($q, $request, 'user_id');
         }
 
+        if ($this->isBatimentViewer($request)) {
+            $q->whereHas('user', fn ($b) => $b->where(
+                'profile_type',
+                '!=',
+                User::PROFILE_ENTREPRENEUR_BATIMENT
+            ));
+        }
+
         $kind = $request->string('service_kind')->trim()->toString();
         if ($kind !== '') {
             if ($kind === 'entrepreneur') {
@@ -52,7 +60,12 @@ class PublicServiceController extends Controller
         if ($search !== '') {
             $q->where(function ($b) use ($search) {
                 $b->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('user', function ($u) use ($search) {
+                        $u->where('company_name', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%")
+                            ->orWhere('activity_type', 'like', "%{$search}%");
+                    });
             });
         }
         if ($request->filled('category_id')) {
@@ -75,6 +88,11 @@ class PublicServiceController extends Controller
         }
 
         $service->load(['category', 'user']);
+
+        if ($this->isBatimentViewer($request)
+            && $service->user?->profile_type === User::PROFILE_ENTREPRENEUR_BATIMENT) {
+            return response()->json(['message' => 'Non trouvé.'], 404);
+        }
 
         return response()->json(['data' => $this->toRow($service, true)]);
     }
@@ -106,11 +124,19 @@ class PublicServiceController extends Controller
         ];
 
         if ($s->relationLoaded('user') && $s->user) {
+            $owner = $s->user;
+            $description = trim((string) ($owner->company_description ?? ''));
+            if ($description === '') {
+                $description = trim((string) ($owner->bio ?? ''));
+            }
             $row['owner'] = [
-                'id' => $s->user->id,
-                'name' => $s->user->name,
-                'profile_type' => $s->user->profile_type,
-                'company_name' => $s->user->company_name,
+                'id' => $owner->id,
+                'name' => $owner->name,
+                'profile_type' => $owner->profile_type,
+                'company_name' => $owner->company_name,
+                'company_address' => $owner->company_address,
+                'activity_type' => $owner->activity_type,
+                'description' => $description !== '' ? $description : null,
             ];
         }
         if ($s->relationLoaded('category') && $s->category) {

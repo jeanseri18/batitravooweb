@@ -40,6 +40,7 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 
 Route::get('/categories', PublicCategoryController::class);
 Route::get('/marketplace/providers', [PublicMarketplaceProviderController::class, 'index']);
+Route::get('/marketplace/providers/{user}', [PublicMarketplaceProviderController::class, 'show'])->whereNumber('user');
 Route::get('/products', [PublicProductController::class, 'index']);
 Route::get('/products/{product}', [PublicProductController::class, 'show'])->whereNumber('product');
 Route::get('/services', [PublicServiceController::class, 'index']);
