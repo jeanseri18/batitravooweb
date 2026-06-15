@@ -147,12 +147,6 @@ class PublicMarketplaceProviderController extends Controller
 
     private function displayName(User $u): string
     {
-        $company = trim((string) ($u->company_name ?? ''));
-        if ($company !== '') {
-            return $company;
-        }
-        $name = trim((string) ($u->name ?? ''));
-
-        return $name !== '' ? $name : 'Prestataire';
+        return $u->marketplaceDisplayName();
     }
 }

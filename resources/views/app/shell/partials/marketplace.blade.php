@@ -309,10 +309,17 @@
                                     <span class="mp-stock {{ $stockClass }}">{{ $stockLabel }}</span>
                                 </div>
                                 <div class="mp-card__footer">
-                                    @if (! empty($row['owner']['company_name']))
-                                        <span class="mp-card__seller">{{ $row['owner']['company_name'] }}</span>
-                                    @elseif (! empty($row['owner']['name']))
-                                        <span class="mp-card__seller">{{ $row['owner']['name'] }}</span>
+                                    @php
+                                        $sellerName = trim((string) ($row['owner']['display_name'] ?? ''));
+                                        if ($sellerName === '') {
+                                            $sellerName = trim((string) ($row['owner']['company_name'] ?? ''));
+                                        }
+                                        if ($sellerName === '') {
+                                            $sellerName = trim((string) ($row['owner']['name'] ?? ''));
+                                        }
+                                    @endphp
+                                    @if ($sellerName !== '')
+                                        <span class="mp-card__seller">{{ $sellerName }}</span>
                                     @endif
                                     @if (isset($row['views_count']))
                                         <span class="mp-card__views">{{ (int) $row['views_count'] }} vues</span>

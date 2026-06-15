@@ -19,8 +19,15 @@ class ProfileController extends Controller
 
     public function show(Request $request): JsonResponse
     {
+        /** @var User $user */
+        $user = $request->user();
+        $user->syncBusinessIdentity();
+        if ($user->isDirty()) {
+            $user->save();
+        }
+
         return response()->json([
-            'user' => $this->userToArray($request->user()),
+            'user' => $this->userToArray($user->fresh()),
             'meta' => [
                 'labels' => $this->profileUiLabels(),
             ],
@@ -131,6 +138,7 @@ class ProfileController extends Controller
         }
 
         $user->fill($data);
+        $user->syncBusinessIdentity();
         $user->save();
 
         return response()->json(['user' => $this->userToArray($user->fresh())]);

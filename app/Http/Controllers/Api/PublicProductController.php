@@ -16,7 +16,17 @@ class PublicProductController extends Controller
     public function index(Request $request): JsonResponse
     {
         $q = Product::query()
-            ->where('status', 'approved')
+            ->where(function ($statusQuery) {
+                $statusQuery->where('status', 'approved')
+                    ->orWhere(function ($pending) {
+                        $pending->where('status', 'pending')
+                            ->whereHas('user', function ($u) {
+                                $u->where('profile_type', User::PROFILE_ENTREPRISE_FOURNISSEUR)
+                                    ->where('profile_validation_status', User::VALIDATION_APPROVED)
+                                    ->where('is_active', true);
+                            });
+                    });
+            })
             ->whereHas('user', function ($b) {
                 $b->where('profile_type', User::PROFILE_ENTREPRISE_FOURNISSEUR)
                     ->where('is_active', true);
@@ -61,7 +71,7 @@ class PublicProductController extends Controller
 
     public function show(Product $product): JsonResponse
     {
-        if ($product->status !== 'approved') {
+        if (! $this->isPubliclyVisible($product)) {
             return response()->json(['message' => 'Non trouvé.'], 404);
         }
 
@@ -89,7 +99,9 @@ class PublicProductController extends Controller
             'image_url' => $imageUrl,
             'has_image' => $p->image_path !== null && $p->image_path !== '',
             'price_amount' => (int) $p->price_amount,
-            'price_display_fr' => number_format((int) $p->price_amount, 0, ',', ' ').' FCFA',
+            'price_display_fr' => (int) $p->price_amount > 0
+                ? number_format((int) $p->price_amount, 0, ',', ' ').' FCFA'
+                : 'Sur devis',
             'stock_units' => (int) $p->stock_units,
             'unit_of_measure' => $p->unit_of_measure ?: Product::UNIT_PIECE,
             'unit_of_measure_label' => $p->unitLabel(),
@@ -108,6 +120,7 @@ class PublicProductController extends Controller
             $base['owner'] = [
                 'id' => $owner->id,
                 'name' => $owner->name,
+                'display_name' => $owner->marketplaceDisplayName(),
                 'profile_type' => $owner->profile_type,
                 'company_name' => $owner->company_name,
                 'company_address' => $owner->company_address,
@@ -130,5 +143,25 @@ class PublicProductController extends Controller
         }
 
         return $base;
+    }
+
+    private function isPubliclyVisible(Product $product): bool
+    {
+        if ($product->status === 'approved') {
+            return true;
+        }
+
+        if ($product->status !== 'pending') {
+            return false;
+        }
+
+        $owner = $product->user;
+        if ($owner === null) {
+            return false;
+        }
+
+        return $owner->profile_type === User::PROFILE_ENTREPRISE_FOURNISSEUR
+            && $owner->profile_validation_status === User::VALIDATION_APPROVED
+            && $owner->is_active;
     }
 }

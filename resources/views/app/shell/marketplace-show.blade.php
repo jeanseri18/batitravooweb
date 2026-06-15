@@ -187,7 +187,16 @@
             @endphp
             <div class="mp-detail__owner">
                 <h3 class="mp-detail__owner-title">{{ $ownerRoleLabel }}</h3>
-                <p class="mp-detail__owner-name">{{ $item['owner']['company_name'] ?? $item['owner']['name'] ?? '—' }}</p>
+                @php
+                    $ownerDisplay = trim((string) ($item['owner']['display_name'] ?? ''));
+                    if ($ownerDisplay === '') {
+                        $ownerDisplay = trim((string) ($item['owner']['company_name'] ?? ''));
+                    }
+                    if ($ownerDisplay === '') {
+                        $ownerDisplay = trim((string) ($item['owner']['name'] ?? ''));
+                    }
+                @endphp
+                <p class="mp-detail__owner-name">{{ $ownerDisplay !== '' ? $ownerDisplay : '—' }}</p>
                 @if (! empty($item['owner']['activity_type']))
                     <p class="app-muted app-mt-sm"><strong>Expertise :</strong> {{ $item['owner']['activity_type'] }}</p>
                 @endif

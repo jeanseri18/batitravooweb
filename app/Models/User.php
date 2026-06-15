@@ -104,6 +104,52 @@ class User extends Authenticatable
         return $this->role === self::ROLE_ADMIN;
     }
 
+    /**
+     * Nom affiché marketplace / catalogue (entreprise prioritaire sur le nom personnel).
+     */
+    public function marketplaceDisplayName(): string
+    {
+        $company = trim((string) ($this->company_name ?? ''));
+        if ($company !== '') {
+            return $company;
+        }
+
+        $name = trim((string) ($this->name ?? ''));
+
+        return $name !== '' ? $name : 'Prestataire';
+    }
+
+    public function isBusinessProfile(): bool
+    {
+        return in_array($this->profile_type, [
+            self::PROFILE_ENTREPRISE_FOURNISSEUR,
+            self::PROFILE_ENTREPRENEUR_BATIMENT,
+        ], true);
+    }
+
+    /**
+     * Garde name et company_name alignés pour les comptes entreprise.
+     */
+    public function syncBusinessIdentity(): void
+    {
+        if (! $this->isBusinessProfile()) {
+            return;
+        }
+
+        $company = trim((string) ($this->company_name ?? ''));
+        $name = trim((string) ($this->name ?? ''));
+
+        if ($company !== '') {
+            $this->name = $company;
+
+            return;
+        }
+
+        if ($name !== '') {
+            $this->company_name = $name;
+        }
+    }
+
     public function products()
     {
         return $this->hasMany(Product::class);

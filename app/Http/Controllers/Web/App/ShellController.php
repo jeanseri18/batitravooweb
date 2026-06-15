@@ -467,7 +467,7 @@ class ShellController extends Controller
             }
             if ($page === 'vue_publique') {
                 $viewData['profileData'] = $bridge->profile($request);
-                $viewData['productsList'] = $bridge->myProducts($request);
+                $viewData['productsList'] = $bridge->publicCatalogProducts($request);
             }
             if ($page === 'vue_publique_batiment') {
                 $viewData['profileData'] = $bridge->profile($request);

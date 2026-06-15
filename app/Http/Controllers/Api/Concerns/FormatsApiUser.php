@@ -14,6 +14,7 @@ trait FormatsApiUser
         return [
             'id' => $user->id,
             'name' => $user->name,
+            'display_name' => $user->marketplaceDisplayName(),
             'email' => $user->email,
             'profile_type' => $user->profile_type,
             'phone' => $user->phone,

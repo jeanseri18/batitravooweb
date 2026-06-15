@@ -17,6 +17,13 @@ class ProductController extends Controller
         $u = $request->user();
         abort_unless($u->profile_type === User::PROFILE_ENTREPRISE_FOURNISSEUR, 403);
 
+        if ($u->profile_validation_status === User::VALIDATION_APPROVED) {
+            Product::query()
+                ->where('user_id', $u->id)
+                ->where('status', 'pending')
+                ->update(['status' => 'approved']);
+        }
+
         $items = Product::query()->where('user_id', $u->id)
             ->with('category')
             ->orderByDesc('id')
@@ -149,7 +156,9 @@ class ProductController extends Controller
             'image_url' => $imageUrl,
             'has_image' => $p->image_path !== null && $p->image_path !== '',
             'price_amount' => (int) $p->price_amount,
-            'price_display_fr' => number_format((int) $p->price_amount, 0, ',', ' ').' FCFA',
+            'price_display_fr' => (int) $p->price_amount > 0
+                ? number_format((int) $p->price_amount, 0, ',', ' ').' FCFA'
+                : 'Sur devis',
             'stock_units' => (int) $p->stock_units,
             'unit_of_measure' => $p->unit_of_measure ?: Product::UNIT_PIECE,
             'unit_of_measure_label' => $p->unitLabel(),

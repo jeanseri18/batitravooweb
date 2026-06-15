@@ -1,7 +1,10 @@
 @php
     $u = $profileData['user'] ?? [];
-    $company = trim((string) ($u['company_name'] ?? ''));
-    $displayName = $company !== '' ? $company : (string) ($u['name'] ?? 'Entreprise');
+    $displayName = trim((string) ($u['display_name'] ?? ''));
+    if ($displayName === '') {
+        $company = trim((string) ($u['company_name'] ?? ''));
+        $displayName = $company !== '' ? $company : (string) ($u['name'] ?? 'Entreprise');
+    }
     $bio = trim((string) ($u['bio'] ?? ''));
     if ($bio === '') {
         $bio = trim((string) ($u['company_description'] ?? ''));

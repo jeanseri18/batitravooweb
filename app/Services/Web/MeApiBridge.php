@@ -206,10 +206,16 @@ class MeApiBridge
             'owner' => $request->filled('owner') ? (string) $request->query('owner') : null,
         ], fn ($v) => $v !== null && $v !== '');
 
-        $productsReq = Request::create('/', 'GET', $productQuery);
-        $productsResponse = app(PublicProductController::class)->index($productsReq);
-        $this->assertOk($productsResponse);
-        $productsPayload = $this->decode($productsResponse);
+        $supplierCatalog = isset($productQuery['user_id']) && (int) $productQuery['user_id'] > 0;
+        if ($supplierCatalog) {
+            $productsPayload = $this->fetchAllPublicProducts($request, $productQuery);
+        } else {
+            $productsReq = Request::create('/', 'GET', $productQuery);
+            $productsReq->setUserResolver(fn () => $request->user());
+            $productsResponse = app(PublicProductController::class)->index($productsReq);
+            $this->assertOk($productsResponse);
+            $productsPayload = $this->decode($productsResponse);
+        }
 
         $servicesReq = Request::create('/', 'GET', $serviceQuery);
         $servicesResponse = app(PublicServiceController::class)->index($servicesReq);
@@ -385,6 +391,63 @@ class MeApiBridge
         $data = $this->decode($response);
 
         return $data['data'] ?? [];
+    }
+
+    /**
+     * @param  array<string, mixed>  $query
+     * @return array<string, mixed>
+     */
+    private function fetchAllPublicProducts(Request $request, array $query): array
+    {
+        $all = [];
+        $page = 1;
+        $lastPage = 1;
+        $perPage = (int) ($query['per_page'] ?? 50);
+
+        do {
+            $sub = Request::create('/', 'GET', array_merge($query, [
+                'page' => $page,
+                'per_page' => $perPage,
+            ]));
+            $sub->setUserResolver(fn () => $request->user());
+            $response = app(PublicProductController::class)->index($sub);
+            $this->assertOk($response);
+            $payload = $this->decode($response);
+            $chunk = $payload['data'] ?? [];
+            if (is_array($chunk)) {
+                $all = array_merge($all, $chunk);
+            }
+            $lastPage = (int) ($payload['last_page'] ?? 1);
+            $page++;
+        } while ($page <= $lastPage);
+
+        return [
+            'data' => $all,
+            'current_page' => 1,
+            'last_page' => 1,
+            'per_page' => count($all) > 0 ? count($all) : $perPage,
+            'total' => count($all),
+        ];
+    }
+
+    /**
+     * Catalogue public du fournisseur connecté (même liste que les clients).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function publicCatalogProducts(Request $request): array
+    {
+        $userId = (int) $request->user()->id;
+        if ($userId <= 0) {
+            return [];
+        }
+
+        $payload = $this->fetchAllPublicProducts($request, [
+            'user_id' => $userId,
+            'per_page' => 50,
+        ]);
+
+        return $payload['data'] ?? [];
     }
 
     /**
